@@ -4,6 +4,13 @@
  * Modifier values are authored at their Common (1×) base.
  * scaleItem() multiplies them by the item's rarity tier at build time,
  * so SEED_ITEMS always contains correctly-scaled values.
+ *
+ * Milestone 5 decision: the equippable entries here are kept as a
+ * "starter gift" — the player spawns with them in inventory so they can
+ * immediately equip something and see stats update, without having to click
+ * "Generate Item" first. Consumables stay for the same reason.
+ * Future work: replace the starter equippables with generated items seeded
+ * from a fixed seed so the opening inventory is still deterministic.
  */
 import type { Item } from "./item";
 import { scaleItem } from "./scale-item";

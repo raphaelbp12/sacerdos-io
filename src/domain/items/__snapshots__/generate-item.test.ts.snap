@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateItem > headline acceptance test > seed 42 itemLevel 5: deterministic full Item snapshot 1`] = `
+{
+  "id": "leather-boots-702760",
+  "kind": "equippable",
+  "levelReq": 1,
+  "modifiers": [
+    {
+      "attribute": "AGI",
+      "kind": "flat",
+      "value": 17,
+    },
+  ],
+  "name": "Leather Boots",
+  "rarity": "Common",
+  "slot": "boots",
+}
+`;

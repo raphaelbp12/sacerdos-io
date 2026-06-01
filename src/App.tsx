@@ -7,9 +7,16 @@ import {
   EQUIPMENT_SLOTS,
   SEED_ITEMS,
   rarityMultiplier,
+  generateItem,
 } from "./domain/items";
+import { SeededRng } from "./domain/rng";
 import type { Attribute } from "./domain/stats";
 import type { EquipmentSlot, Item } from "./domain/items";
+
+// Created at module load time (once per app session).
+// Non-deterministic seed is intentional here — this is the outer UI layer.
+// Domain code never calls Math.random(); it always receives this injected rng.
+const appRng = new SeededRng(Date.now());
 
 const CHARACTER_LEVEL = 5;
 
@@ -86,6 +93,12 @@ function App() {
 
   function handleNextTurn() {
     character.advance(1);
+    forceUpdate();
+  }
+
+  function handleGenerateItem() {
+    const item = generateItem(appRng, { itemLevel: CHARACTER_LEVEL });
+    inventory.add(item);
     forceUpdate();
   }
 
@@ -219,6 +232,9 @@ function App() {
 
       <button className="next-turn-btn" onClick={handleNextTurn}>
         Next Turn
+      </button>
+      <button className="next-turn-btn" onClick={handleGenerateItem}>
+        Generate Item
       </button>
     </main>
   );

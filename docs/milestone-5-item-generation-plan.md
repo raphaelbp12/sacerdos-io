@@ -83,15 +83,15 @@ src/
 > Goal: a deterministic `Rng` implementation so all generation is reproducible and assertable.
 > Use **mulberry32** (a tiny, well-known seedable PRNG) — do not hand-roll a novel algorithm.
 
-- [ ] **1.1** Write `seeded-rng.test.ts` first. Assert:
-  - [ ] Two `SeededRng` created with the **same seed** produce the **same sequence** of `nextInt` / `nextFloat` results.
-  - [ ] Two with **different seeds** diverge.
-  - [ ] `nextFloat()` is always in `[0, 1)`.
-  - [ ] `nextInt(min, max)` is always within `[min, max]` **inclusive** (match the contract in [src/domain/rng/rng.ts](../src/domain/rng/rng.ts)), including the edge case `nextInt(5, 5) === 5`.
-  - [ ] A known seed produces a known, hard-coded first value (a regression lock).
-- [ ] **1.2** Implement `seeded-rng.ts`: `export class SeededRng implements Rng` taking a numeric `seed` in the constructor. Implement `nextFloat` via mulberry32; derive `nextInt(min, max)` from `nextFloat` using `Math.floor(nextFloat() * (max - min + 1)) + min`.
-- [ ] **1.3** Export `SeededRng` from the rng barrel ([src/domain/rng/index.ts](../src/domain/rng/index.ts)).
-- [ ] **1.4** ✅ Confirm: all Phase 1 tests pass; no `Math.random()` anywhere.
+- [x] **1.1** Write `seeded-rng.test.ts` first. Assert:
+  - [x] Two `SeededRng` created with the **same seed** produce the **same sequence** of `nextInt` / `nextFloat` results.
+  - [x] Two with **different seeds** diverge.
+  - [x] `nextFloat()` is always in `[0, 1)`.
+  - [x] `nextInt(min, max)` is always within `[min, max]` **inclusive** (match the contract in [src/domain/rng/rng.ts](../src/domain/rng/rng.ts)), including the edge case `nextInt(5, 5) === 5`.
+  - [x] A known seed produces a known, hard-coded first value (a regression lock).
+- [x] **1.2** Implement `seeded-rng.ts`: `export class SeededRng implements Rng` taking a numeric `seed` in the constructor. Implement `nextFloat` via mulberry32; derive `nextInt(min, max)` from `nextFloat` using `Math.floor(nextFloat() * (max - min + 1)) + min`.
+- [x] **1.3** Export `SeededRng` from the rng barrel ([src/domain/rng/index.ts](../src/domain/rng/index.ts)).
+- [x] **1.4** ✅ Confirm: all Phase 1 tests pass; no `Math.random()` anywhere.
 
 ---
 
@@ -101,13 +101,13 @@ src/
 > so we never hand-author "L1 / L5 / L10" duplicate rows. This is the formula that the old
 > per-tier idea was approximating by hand.
 
-- [ ] **2.1** Write `level-curve.test.ts` first. Assert:
-  - [ ] `baseValueForLevel(1)` equals the agreed level-1 baseline (pick a small integer, e.g. `5`).
-  - [ ] The curve is **monotonically non-decreasing**: `baseValueForLevel(n+1) >= baseValueForLevel(n)`.
-  - [ ] A couple of explicit anchor points are locked (e.g. level 1, 5, 10) so future tuning is a conscious change.
-  - [ ] Output is always an **integer** (round/floor inside the function — stats are whole numbers).
-- [ ] **2.2** Implement `level-curve.ts`: `export function baseValueForLevel(level: number): number`. Start with a simple linear-ish formula such as `floor(BASE + level * PER_LEVEL)`. Keep `BASE` and `PER_LEVEL` as named module constants so tuning is one edit. Document the chosen formula in a comment.
-- [ ] **2.3** ✅ Confirm: Phase 2 tests pass.
+- [x] **2.1** Write `level-curve.test.ts` first. Assert:
+  - [x] `baseValueForLevel(1)` equals the agreed level-1 baseline (pick a small integer, e.g. `5`).
+  - [x] The curve is **monotonically non-decreasing**: `baseValueForLevel(n+1) >= baseValueForLevel(n)`.
+  - [x] A couple of explicit anchor points are locked (e.g. level 1, 5, 10) so future tuning is a conscious change.
+  - [x] Output is always an **integer** (round/floor inside the function — stats are whole numbers).
+- [x] **2.2** Implement `level-curve.ts`: `export function baseValueForLevel(level: number): number`. Start with a simple linear-ish formula such as `floor(BASE + level * PER_LEVEL)`. Keep `BASE` and `PER_LEVEL` as named module constants so tuning is one edit. Document the chosen formula in a comment.
+- [x] **2.3** ✅ Confirm: Phase 2 tests pass.
 
 > Note: this curve sets the **pre-rarity** magnitude (Common 1× baseline), consistent with
 > how `SEED_ITEMS` authors values today. `scaleItem` applies rarity on top later.
@@ -120,7 +120,8 @@ src/
 > archetype**, not a per-level duplicate. New gear _types_ unlock over the level curve via
 > `minLevel`.
 
-- [ ] **3.1** Write `item-base.ts`: define the `ItemBase` interface. Required fields:
+- [x] **3.1** Write `item-base.ts`: define the `ItemBase` interface. Required fields:
+
   ```ts
   export interface ItemBase {
     readonly id: string; // "short-sword"
@@ -132,22 +133,23 @@ src/
   }
   ```
 
-  - [ ] Reuse `ItemKind`, `EquipmentSlot`, and `Attribute` from existing modules — do **not** redeclare them.
-- [ ] **3.2** Write `item-bases.ts`: `export const ITEM_BASES: readonly ItemBase[]`. Seed it with a small, sensible set — **one archetype per slot is enough to start** (no per-level duplicates):
-  - [ ] `short-sword` → slot `weapon`, `minLevel 1`, rolls `STR`.
-  - [ ] `leather-helm` → slot `helm`, `minLevel 1`, rolls `HP`.
-  - [ ] `leather-body` → slot `body`, `minLevel 1`, rolls `HP`.
-  - [ ] `leather-gloves` → slot `gloves`, `minLevel 1`, rolls `AGI`.
-  - [ ] `leather-boots` → slot `boots`, `minLevel 1`, rolls `AGI`.
-  - [ ] `copper-ring` → slot `ring`, `minLevel 1`, rolls `INT` or `STR`.
-  - [ ] `copper-amulet` → slot `amulet`, `minLevel 1`, rolls `MP`.
-  - [ ] Add **one** higher-tier archetype to prove the gate works, e.g. `plate-body` → slot `body`, `minLevel 10`, rolls `HP`, `STR`.
-- [ ] **3.3** Write `item-bases.test.ts`. Assert DB invariants (these catch future data-entry mistakes):
-  - [ ] Every `slot` is a member of `EQUIPMENT_SLOTS`.
-  - [ ] Every `rollableAttributes` entry is a valid `Attribute`, and the list is non-empty.
-  - [ ] Every `id` is unique.
-  - [ ] Every `minLevel >= 1`.
-- [ ] **3.4** ✅ Confirm: Phase 3 tests pass.
+  - [x] Reuse `ItemKind`, `EquipmentSlot`, and `Attribute` from existing modules — do **not** redeclare them.
+
+- [x] **3.2** Write `item-bases.ts`: `export const ITEM_BASES: readonly ItemBase[]`. Seed it with a small, sensible set — **one archetype per slot is enough to start** (no per-level duplicates):
+  - [x] `short-sword` → slot `weapon`, `minLevel 1`, rolls `STR`.
+  - [x] `leather-helm` → slot `helm`, `minLevel 1`, rolls `HP`.
+  - [x] `leather-body` → slot `body`, `minLevel 1`, rolls `HP`.
+  - [x] `leather-gloves` → slot `gloves`, `minLevel 1`, rolls `AGI`.
+  - [x] `leather-boots` → slot `boots`, `minLevel 1`, rolls `AGI`.
+  - [x] `copper-ring` → slot `ring`, `minLevel 1`, rolls `INT` or `STR`.
+  - [x] `copper-amulet` → slot `amulet`, `minLevel 1`, rolls `MP`.
+  - [x] Add **one** higher-tier archetype to prove the gate works, e.g. `plate-body` → slot `body`, `minLevel 10`, rolls `HP`, `STR`.
+- [x] **3.3** Write `item-bases.test.ts`. Assert DB invariants (these catch future data-entry mistakes):
+  - [x] Every `slot` is a member of `EQUIPMENT_SLOTS`.
+  - [x] Every `rollableAttributes` entry is a valid `Attribute`, and the list is non-empty.
+  - [x] Every `id` is unique.
+  - [x] Every `minLevel >= 1`.
+- [x] **3.4** ✅ Confirm: Phase 3 tests pass.
 
 > Design note for the implementer: keep this file **pure data** (no functions, no logic).
 > A designer must be able to add a row without touching engine code. This is the "data, not
@@ -159,12 +161,12 @@ src/
 
 > Goal: roll a `Rarity` using the injected `Rng`, with common rarities common and legendary rare.
 
-- [ ] **4.1** Write `roll-rarity.test.ts` first. Assert:
-  - [ ] `rollRarity(rng)` always returns a member of `RARITIES`.
-  - [ ] With a **seeded** rng, the result is deterministic (lock a known seed → known rarity).
-  - [ ] Over many rolls with a seeded rng, the distribution is **weighted** (Common appears far more often than Legendary). Assert counts, not exact frequencies — e.g. `commonCount > legendaryCount`.
-- [ ] **4.2** Implement `roll-rarity.ts`: `export function rollRarity(rng: Rng): Rarity`. Use a weight table (a `Record<Rarity, number>` or parallel array) and a single `rng.nextFloat()` to pick a band. Keep the weights as a named constant so they're tunable in one place.
-- [ ] **4.3** ✅ Confirm: Phase 4 tests pass.
+- [x] **4.1** Write `roll-rarity.test.ts` first. Assert:
+  - [x] `rollRarity(rng)` always returns a member of `RARITIES`.
+  - [x] With a **seeded** rng, the result is deterministic (lock a known seed → known rarity).
+  - [x] Over many rolls with a seeded rng, the distribution is **weighted** (Common appears far more often than Legendary). Assert counts, not exact frequencies — e.g. `commonCount > legendaryCount`.
+- [x] **4.2** Implement `roll-rarity.ts`: `export function rollRarity(rng: Rng): Rarity`. Use a weight table (a `Record<Rarity, number>` or parallel array) and a single `rng.nextFloat()` to pick a band. Keep the weights as a named constant so they're tunable in one place.
+- [x] **4.3** ✅ Confirm: Phase 4 tests pass.
 
 ---
 
@@ -173,15 +175,15 @@ src/
 > Goal: compose Phases 1–4 into the public `generateItem`. This is the only file that knows
 > about bases, the curve, the rarity roll, and `scaleItem`.
 
-- [ ] **5.1** Write `generate-item.test.ts` first. Assert (with a `SeededRng`):
-  - [ ] **Determinism:** `generateItem(new SeededRng(42), { itemLevel: 5 })` deep-equals a second call with a fresh `new SeededRng(42)`. (Lock the whole returned `Item`.)
-  - [ ] **Base eligibility:** the chosen base always has `minLevel <= itemLevel`. Generate at `itemLevel: 1` many times and assert the `plate-body` (minLevel 10) base is **never** chosen; generate at `itemLevel: 10+` and assert it _can_ appear.
-  - [ ] **Slot correctness:** the returned `Item.slot` matches the chosen base's slot.
-  - [ ] **Rollable attributes only:** every modifier's `attribute` is in the base's `rollableAttributes`.
-  - [ ] **Level scaling:** a higher `itemLevel` yields modifier values `>=` those at a lower level (compare same base / same rarity by seeding to force them, or compare pre-scale magnitudes).
-  - [ ] **Rarity scaling applied:** the final modifier values equal `baseValueForLevel(itemLevel) × rarityMultiplier(rolledRarity)` (i.e. `scaleItem` ran). Confirm a Rare item's value is 3× the Common baseline.
-  - [ ] **Valid Item shape:** `kind === 'equippable'`, `levelReq` set sensibly (see 5.2), `modifiers` non-empty, unique `id`.
-- [ ] **5.2** Implement `generate-item.ts`:
+- [x] **5.1** Write `generate-item.test.ts` first. Assert (with a `SeededRng`):
+  - [x] **Determinism:** `generateItem(new SeededRng(42), { itemLevel: 5 })` deep-equals a second call with a fresh `new SeededRng(42)`. (Lock the whole returned `Item`.)
+  - [x] **Base eligibility:** the chosen base always has `minLevel <= itemLevel`. Generate at `itemLevel: 1` many times and assert the `plate-body` (minLevel 10) base is **never** chosen; generate at `itemLevel: 10+` and assert it _can_ appear.
+  - [x] **Slot correctness:** the returned `Item.slot` matches the chosen base's slot.
+  - [x] **Rollable attributes only:** every modifier's `attribute` is in the base's `rollableAttributes`.
+  - [x] **Level scaling:** a higher `itemLevel` yields modifier values `>=` those at a lower level (compare same base / same rarity by seeding to force them, or compare pre-scale magnitudes).
+  - [x] **Rarity scaling applied:** the final modifier values equal `baseValueForLevel(itemLevel) × rarityMultiplier(rolledRarity)` (i.e. `scaleItem` ran). Confirm a Rare item's value is 3× the Common baseline.
+  - [x] **Valid Item shape:** `kind === 'equippable'`, `levelReq` set sensibly (see 5.2), `modifiers` non-empty, unique `id`.
+- [x] **5.2** Implement `generate-item.ts`:
   ```ts
   export interface GenerateOptions {
     readonly itemLevel: number;
@@ -198,8 +200,8 @@ src/
   7. **Construct** a Common-magnitude `Item` (id should be unique — derive from base id + a roll counter or rng value; name from base name).
   8. **Set** `levelReq = base.minLevel` (or `opts.itemLevel`; pick one and document it).
   9. **Return** `scaleItem(item)` so rarity multiplies the values — **reuse the existing function**.
-- [ ] **5.3** Export `generateItem`, `GenerateOptions`, `ItemBase`, `ITEM_BASES`, `baseValueForLevel`, `rollRarity` from the items barrel ([src/domain/items/index.ts](../src/domain/items/index.ts)).
-- [ ] **5.4** ✅ Confirm: Phase 5 tests pass; the headline acceptance test (deterministic generation at itemLevel 5) is green.
+- [x] **5.3** Export `generateItem`, `GenerateOptions`, `ItemBase`, `ITEM_BASES`, `baseValueForLevel`, `rollRarity` from the items barrel ([src/domain/items/index.ts](../src/domain/items/index.ts)).
+- [x] **5.4** ✅ Confirm: Phase 5 tests pass; the headline acceptance test (deterministic generation at itemLevel 5) is green.
 
 ---
 
@@ -208,18 +210,18 @@ src/
 > Goal: make the new system visible. A single button proves the loop end-to-end on the
 > existing spreadsheet UI.
 
-- [ ] **6.1** In [src/App.tsx](../src/App.tsx), create one `SeededRng` instance (e.g. seeded from `Date.now()` — this is the **UI/outer layer**, so a non-deterministic seed is fine _here_, never in domain).
-- [ ] **6.2** Add a **"Generate Item"** button that calls `generateItem(rng, { itemLevel: <character level> })` and `inventory.add(...)` the result, then forces the existing re-render.
-- [ ] **6.3** ✅ Manual test: click the button → a new rolled item appears in the Inventory panel → it can be equipped → stats update.
+- [x] **6.1** In [src/App.tsx](../src/App.tsx), create one `SeededRng` instance (e.g. seeded from `Date.now()` — this is the **UI/outer layer**, so a non-deterministic seed is fine _here_, never in domain).
+- [x] **6.2** Add a **"Generate Item"** button that calls `generateItem(rng, { itemLevel: <character level> })` and `inventory.add(...)` the result, then forces the existing re-render.
+- [x] **6.3** ✅ Manual test: click the button → a new rolled item appears in the Inventory panel → it can be equipped → stats update.
 
 ---
 
 ## Phase 7 — Cleanup & docs
 
-- [ ] **7.1** Decide the fate of the equippable entries in `SEED_ITEMS`: either keep them as a small "starter gift" set, or replace them with generated items. Document the decision in a code comment. (Consumables in `SEED_ITEMS` stay — they are out of scope here.)
-- [ ] **7.2** Run the full test suite (`npm test` / Vitest) — everything green.
-- [ ] **7.3** Run the linter/build (`npm run lint`, `npm run build`) — no errors.
-- [ ] **7.4** Mark this milestone complete and note follow-ups below.
+- [x] **7.1** Decide the fate of the equippable entries in `SEED_ITEMS`: either keep them as a small "starter gift" set, or replace them with generated items. Document the decision in a code comment. (Consumables in `SEED_ITEMS` stay — they are out of scope here.)
+- [x] **7.2** Run the full test suite (`npm test` / Vitest) — everything green.
+- [x] **7.3** Run the linter/build (`npm run lint`, `npm run build`) — no errors.
+- [x] **7.4** Mark this milestone complete and note follow-ups below.
 
 ---
 
@@ -235,9 +237,9 @@ src/
 
 ## Definition of done
 
-- [ ] A seeded `Rng` implementation exists and is reused everywhere generation needs randomness.
-- [ ] `ITEM_BASES` is a pure-data archetype database; new gear types are one-row additions.
-- [ ] `generateItem(rng, { itemLevel })` returns deterministic, correctly slot-typed, rarity-scaled, level-scaled `Item`s.
-- [ ] No `Math.random()` and no wall-clock reads in any `src/domain/` file.
-- [ ] All new code is TDD'd (failing test first) and every phase's tests are green.
-- [ ] The UI can generate an item and equip it end-to-end.
+- [x] A seeded `Rng` implementation exists and is reused everywhere generation needs randomness.
+- [x] `ITEM_BASES` is a pure-data archetype database; new gear types are one-row additions.
+- [x] `generateItem(rng, { itemLevel })` returns deterministic, correctly slot-typed, rarity-scaled, level-scaled `Item`s.
+- [x] No `Math.random()` and no wall-clock reads in any `src/domain/` file.
+- [x] All new code is TDD'd (failing test first) and every phase's tests are green.
+- [x] The UI can generate an item and equip it end-to-end.
