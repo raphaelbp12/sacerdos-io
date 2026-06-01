@@ -8,3 +8,4 @@ export type { ItemKind, Item } from "./item";
 
 export { Equipment } from "./equipment";
 export { Inventory } from "./inventory";
+export { SEED_ITEMS } from "./seed-items";

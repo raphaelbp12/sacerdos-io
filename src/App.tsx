@@ -1,10 +1,14 @@
-import { useRef, useReducer } from "react";
+import { useState, useReducer } from "react";
 import "./App.css";
 import { Character, ATTRIBUTES } from "./domain/stats";
-import { Equipment, Inventory, EQUIPMENT_SLOTS } from "./domain/items";
+import {
+  Equipment,
+  Inventory,
+  EQUIPMENT_SLOTS,
+  SEED_ITEMS,
+} from "./domain/items";
 import type { Attribute } from "./domain/stats";
 import type { EquipmentSlot, Item } from "./domain/items";
-import { SEED_ITEMS } from "./domain/items/seed-items";
 
 const CHARACTER_LEVEL = 5;
 
@@ -45,23 +49,20 @@ function formatModifiers(item: Item): string {
 }
 
 function App() {
-  const equipmentRef = useRef<Equipment | null>(null);
-  if (equipmentRef.current === null) {
-    equipmentRef.current = new Equipment();
-  }
-
-  const inventoryRef = useRef<Inventory | null>(null);
-  if (inventoryRef.current === null) {
+  // useState with lazy initializers creates each object exactly once.
+  // The same instance is returned on every re-render, so mutations
+  // (equip, use, advance) are reflected without re-creating the objects.
+  const [equipment] = useState(() => new Equipment());
+  const [inventory] = useState(() => {
     const inv = new Inventory();
     SEED_ITEMS.forEach((item) => inv.add(item));
-    inventoryRef.current = inv;
-  }
+    return inv;
+  });
+  const [character] = useState(
+    () => new Character(BASE_STATS, [equipment], CHARACTER_LEVEL),
+  );
 
   const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
-
-  const equipment = equipmentRef.current;
-  const inventory = inventoryRef.current;
-  const character = new Character(BASE_STATS, [equipment], CHARACTER_LEVEL);
 
   function handleEquip(item: Item) {
     const displaced = equipment.equip(item, CHARACTER_LEVEL);
@@ -76,6 +77,19 @@ function App() {
     forceUpdate();
   }
 
+  function handleUse(item: Item) {
+    character.use(item);
+    inventory.remove(item);
+    forceUpdate();
+  }
+
+  function handleNextTurn() {
+    character.advance(1);
+    forceUpdate();
+  }
+
+  const activeBuffs = character.getActiveBuffs();
+
   return (
     <main className="game">
       <h1 className="game-title">Sacerdos</h1>
@@ -88,12 +102,32 @@ function App() {
             {ATTRIBUTES.map((attr) => (
               <tr key={attr}>
                 <th>{attr}</th>
-                <td>{character.getStat(attr)}</td>
+                <td>
+                  {attr === "HP"
+                    ? `${character.currentHP} / ${character.getStat("HP")}`
+                    : character.getStat(attr)}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
+
+      {activeBuffs.length > 0 && (
+        <section className="panel">
+          <h2 className="panel-heading">Active Buffs</h2>
+          <ul className="buff-list">
+            {activeBuffs.map(({ def, remaining }) => (
+              <li key={def.id} className="buff-row">
+                <span className="buff-name">{def.name}</span>
+                <span className="buff-timer">
+                  {remaining} turn{remaining !== 1 ? "s" : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="panel">
         <h2 className="panel-heading">Equipment</h2>
@@ -124,27 +158,63 @@ function App() {
       <section className="panel">
         <h2 className="panel-heading">Inventory</h2>
         {inventory.items.length === 0 ? (
-          <p className="empty-msg">All items equipped</p>
+          <p className="empty-msg">Inventory empty</p>
         ) : (
           <ul className="item-list">
             {inventory.items.map((item) => (
               <li key={item.id}>
-                <button
-                  className={`item-chip ${RARITY_CLASS[item.rarity]}`}
-                  onClick={() => handleEquip(item)}
-                  title={`Equip to ${item.slot}`}
-                >
-                  <span className="item-name">{item.name}</span>
-                  <span className="item-meta">
-                    {item.rarity} · {item.slot}
-                  </span>
-                  <span className="item-mods">{formatModifiers(item)}</span>
-                </button>
+                {item.kind === "consumable" ? (
+                  <button
+                    className={`item-chip ${RARITY_CLASS[item.rarity]}`}
+                    onClick={() => handleUse(item)}
+                    title="Click to use"
+                  >
+                    <span className="item-name">{item.name}</span>
+                    <span className="item-meta item-meta--use">
+                      {item.rarity} · Use
+                    </span>
+                    {item.buff && (
+                      <span className="item-mods">
+                        {item.buff.modifiers
+                          .map((m) =>
+                            m.kind === "flat"
+                              ? `+${m.value} ${m.attribute}`
+                              : `+${Math.round(m.value * 100)}% ${m.attribute}`,
+                          )
+                          .join(", ")}{" "}
+                        for {item.buff.duration} turns
+                      </span>
+                    )}
+                    {item.instantEffects && (
+                      <span className="item-mods">
+                        {item.instantEffects
+                          .map((e) => `Heal +${e.amount} ${e.attribute}`)
+                          .join(", ")}
+                      </span>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    className={`item-chip ${RARITY_CLASS[item.rarity]}`}
+                    onClick={() => handleEquip(item)}
+                    title={`Equip to ${item.slot}`}
+                  >
+                    <span className="item-name">{item.name}</span>
+                    <span className="item-meta">
+                      {item.rarity} · {item.slot}
+                    </span>
+                    <span className="item-mods">{formatModifiers(item)}</span>
+                  </button>
+                )}
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      <button className="next-turn-btn" onClick={handleNextTurn}>
+        Next Turn
+      </button>
     </main>
   );
 }

@@ -195,3 +195,53 @@
     color: #fbbf24;
   }
 }
+
+/* ── Active buffs ─────────────────────────────────────────── */
+.buff-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.buff-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.buff-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.buff-timer {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Consumable "Use" label ──────────────────────────────── */
+.item-meta--use {
+  color: var(--accent);
+}
+
+/* ── Next Turn button ────────────────────────────────────── */
+.next-turn-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.next-turn-btn:hover {
+  background: var(--accent-border);
+}

@@ -1,10 +1,11 @@
 /**
- * Hand-authored starter item catalog for Milestone 2.5.
+ * Hand-authored starter item catalog for Milestone 2.5 / 3.
  * Pure data — no behavior. New items are added here, not as new classes.
  */
 import type { Item } from "./item";
 
 export const SEED_ITEMS: readonly Item[] = [
+  // ── Equippables ────────────────────────────────────────────────────────────
   {
     id: "boots-of-agility",
     name: "Boots of Agility",
@@ -43,5 +44,44 @@ export const SEED_ITEMS: readonly Item[] = [
     levelReq: 2,
     slot: "ring",
     modifiers: [{ attribute: "STR", kind: "flat", value: 12 }],
+  },
+
+  // ── Consumables ────────────────────────────────────────────────────────────
+  {
+    id: "healing-potion",
+    name: "Healing Potion",
+    rarity: "Common",
+    kind: "consumable",
+    levelReq: 1,
+    modifiers: [],
+    instantEffects: [{ type: "heal", attribute: "HP", amount: 30 }],
+  },
+  {
+    id: "agility-elixir",
+    name: "Agility Elixir",
+    rarity: "Uncommon",
+    kind: "consumable",
+    levelReq: 1,
+    modifiers: [],
+    buff: {
+      id: "agi-elixir-buff",
+      name: "Agility Boost",
+      duration: 3,
+      modifiers: [{ attribute: "AGI", kind: "flat", value: 5 }],
+    },
+  },
+  {
+    id: "strength-draught",
+    name: "Strength Draught",
+    rarity: "Uncommon",
+    kind: "consumable",
+    levelReq: 1,
+    modifiers: [],
+    buff: {
+      id: "str-draught-buff",
+      name: "Strength Boost",
+      duration: 5,
+      modifiers: [{ attribute: "STR", kind: "flat", value: 8 }],
+    },
   },
 ];
