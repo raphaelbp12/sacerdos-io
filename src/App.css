@@ -228,6 +228,11 @@
   color: var(--accent);
 }
 
+.item-meta--rarity {
+  font-size: 11px;
+  color: var(--text);
+}
+
 /* ── Next Turn button ────────────────────────────────────── */
 .next-turn-btn {
   width: 100%;

@@ -1,11 +1,16 @@
 /**
- * Hand-authored starter item catalog for Milestone 2.5 / 3.
- * Pure data — no behavior. New items are added here, not as new classes.
+ * Hand-authored starter item catalog for Milestone 2.5 / 3 / 4.
+ *
+ * Modifier values are authored at their Common (1×) base.
+ * scaleItem() multiplies them by the item's rarity tier at build time,
+ * so SEED_ITEMS always contains correctly-scaled values.
  */
 import type { Item } from "./item";
+import { scaleItem } from "./scale-item";
 
-export const SEED_ITEMS: readonly Item[] = [
+const RAW_ITEMS: readonly Item[] = [
   // ── Equippables ────────────────────────────────────────────────────────────
+  // Modifiers are BASE values (Common 1×); scaleItem applies the multiplier.
   {
     id: "boots-of-agility",
     name: "Boots of Agility",
@@ -18,7 +23,7 @@ export const SEED_ITEMS: readonly Item[] = [
   {
     id: "iron-helm",
     name: "Iron Helm",
-    rarity: "Common",
+    rarity: "Legendary",
     kind: "equippable",
     levelReq: 1,
     slot: "helm",
@@ -27,7 +32,7 @@ export const SEED_ITEMS: readonly Item[] = [
   {
     id: "mage-staff",
     name: "Mage Staff",
-    rarity: "Uncommon",
+    rarity: "Uncommon", // 2× → INT 16, MP +50%
     kind: "equippable",
     levelReq: 3,
     slot: "weapon",
@@ -39,14 +44,16 @@ export const SEED_ITEMS: readonly Item[] = [
   {
     id: "berserker-ring",
     name: "Berserker Ring",
-    rarity: "Rare",
+    rarity: "Rare", // 3× → STR +12
     kind: "equippable",
     levelReq: 2,
     slot: "ring",
-    modifiers: [{ attribute: "STR", kind: "flat", value: 12 }],
+    modifiers: [{ attribute: "STR", kind: "flat", value: 4 }],
   },
 
   // ── Consumables ────────────────────────────────────────────────────────────
+  // Consumable modifiers (inside buff) are also scaled; instant amounts are not
+  // (they represent a fixed heal value, not a stat multiplier).
   {
     id: "healing-potion",
     name: "Healing Potion",
@@ -85,3 +92,5 @@ export const SEED_ITEMS: readonly Item[] = [
     },
   },
 ];
+
+export const SEED_ITEMS: readonly Item[] = RAW_ITEMS.map(scaleItem);

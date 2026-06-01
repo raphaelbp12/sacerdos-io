@@ -6,6 +6,7 @@ import {
   Inventory,
   EQUIPMENT_SLOTS,
   SEED_ITEMS,
+  rarityMultiplier,
 } from "./domain/items";
 import type { Attribute } from "./domain/stats";
 import type { EquipmentSlot, Item } from "./domain/items";
@@ -144,6 +145,9 @@ function App() {
                     title="Click to unequip"
                   >
                     <span className="item-name">{item.name}</span>
+                    <span className="item-meta item-meta--rarity">
+                      {item.rarity} ×{rarityMultiplier(item.rarity)}
+                    </span>
                     <span className="item-mods">{formatModifiers(item)}</span>
                   </button>
                 ) : (
@@ -201,7 +205,8 @@ function App() {
                   >
                     <span className="item-name">{item.name}</span>
                     <span className="item-meta">
-                      {item.rarity} · {item.slot}
+                      {item.rarity} ×{rarityMultiplier(item.rarity)} ·{" "}
+                      {item.slot}
                     </span>
                     <span className="item-mods">{formatModifiers(item)}</span>
                   </button>
