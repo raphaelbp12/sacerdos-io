@@ -1,122 +1,243 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useReducer } from "react";
+import "./App.css";
+import { Character, ATTRIBUTES } from "./domain/stats";
+import {
+  Equipment,
+  Inventory,
+  EQUIPMENT_SLOTS,
+  SEED_ITEMS,
+  rarityMultiplier,
+  generateItem,
+} from "./domain/items";
+import { SeededRng } from "./domain/rng";
+import type { Attribute } from "./domain/stats";
+import type { EquipmentSlot, Item } from "./domain/items";
 
-function App() {
-  const [count, setCount] = useState(0)
+// Created at module load time (once per app session).
+// Non-deterministic seed is intentional here — this is the outer UI layer.
+// Domain code never calls Math.random(); it always receives this injected rng.
+const appRng = new SeededRng(Date.now());
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+const CHARACTER_LEVEL = 5;
 
-      <div className="ticks"></div>
+const BASE_STATS: Record<Attribute, number> = {
+  HP: 100,
+  MP: 80,
+  STR: 10,
+  AGI: 10,
+  INT: 10,
+};
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+const RARITY_CLASS: Record<string, string> = {
+  Common: "rarity-common",
+  Uncommon: "rarity-uncommon",
+  Rare: "rarity-rare",
+  Epic: "rarity-epic",
+  Legendary: "rarity-legendary",
+};
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+const SLOT_LABEL: Record<EquipmentSlot, string> = {
+  weapon: "⚔️ Weapon",
+  helm: "🪖 Helm",
+  body: "🛡️ Body",
+  gloves: "🧤 Gloves",
+  boots: "👢 Boots",
+  ring: "💍 Ring",
+  amulet: "📿 Amulet",
+};
+
+function formatModifiers(item: Item): string {
+  return item.modifiers
+    .map((m) =>
+      m.kind === "flat"
+        ? `+${m.value} ${m.attribute}`
+        : `+${Math.round(m.value * 100)}% ${m.attribute}`,
+    )
+    .join(", ");
 }
 
-export default App
+function App() {
+  // useState with lazy initializers creates each object exactly once.
+  // The same instance is returned on every re-render, so mutations
+  // (equip, use, advance) are reflected without re-creating the objects.
+  const [equipment] = useState(() => new Equipment());
+  const [inventory] = useState(() => {
+    const inv = new Inventory();
+    SEED_ITEMS.forEach((item) => inv.add(item));
+    return inv;
+  });
+  const [character] = useState(
+    () => new Character(BASE_STATS, [equipment], CHARACTER_LEVEL),
+  );
+
+  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
+
+  function handleEquip(item: Item) {
+    const displaced = equipment.equip(item, CHARACTER_LEVEL);
+    inventory.remove(item);
+    if (displaced) inventory.add(displaced);
+    forceUpdate();
+  }
+
+  function handleUnequip(slot: EquipmentSlot) {
+    const item = equipment.unequip(slot);
+    if (item) inventory.add(item);
+    forceUpdate();
+  }
+
+  function handleUse(item: Item) {
+    character.use(item);
+    inventory.remove(item);
+    forceUpdate();
+  }
+
+  function handleNextTurn() {
+    character.advance(1);
+    forceUpdate();
+  }
+
+  function handleGenerateItem() {
+    const item = generateItem(appRng, { itemLevel: CHARACTER_LEVEL });
+    inventory.add(item);
+    forceUpdate();
+  }
+
+  const activeBuffs = character.getActiveBuffs();
+
+  return (
+    <main className="game">
+      <h1 className="game-title">Sacerdos</h1>
+      <p className="game-subtitle">Level {CHARACTER_LEVEL}</p>
+
+      <section className="panel">
+        <h2 className="panel-heading">Stats</h2>
+        <table className="stats-table">
+          <tbody>
+            {ATTRIBUTES.map((attr) => (
+              <tr key={attr}>
+                <th>{attr}</th>
+                <td>
+                  {attr === "HP"
+                    ? `${character.currentHP} / ${character.getStat("HP")}`
+                    : character.getStat(attr)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      {activeBuffs.length > 0 && (
+        <section className="panel">
+          <h2 className="panel-heading">Active Buffs</h2>
+          <ul className="buff-list">
+            {activeBuffs.map(({ def, remaining }) => (
+              <li key={def.id} className="buff-row">
+                <span className="buff-name">{def.name}</span>
+                <span className="buff-timer">
+                  {remaining} turn{remaining !== 1 ? "s" : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="panel">
+        <h2 className="panel-heading">Equipment</h2>
+        <ul className="slot-list">
+          {EQUIPMENT_SLOTS.map((slot) => {
+            const item = equipment.getEquipped(slot);
+            return (
+              <li key={slot} className="slot-row">
+                <span className="slot-label">{SLOT_LABEL[slot]}</span>
+                {item ? (
+                  <button
+                    className={`item-chip equipped ${RARITY_CLASS[item.rarity]}`}
+                    onClick={() => handleUnequip(slot)}
+                    title="Click to unequip"
+                  >
+                    <span className="item-name">{item.name}</span>
+                    <span className="item-meta item-meta--rarity">
+                      {item.rarity} ×{rarityMultiplier(item.rarity)}
+                    </span>
+                    <span className="item-mods">{formatModifiers(item)}</span>
+                  </button>
+                ) : (
+                  <span className="slot-empty">—</span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <section className="panel">
+        <h2 className="panel-heading">Inventory</h2>
+        {inventory.items.length === 0 ? (
+          <p className="empty-msg">Inventory empty</p>
+        ) : (
+          <ul className="item-list">
+            {inventory.items.map((item) => (
+              <li key={item.id}>
+                {item.kind === "consumable" ? (
+                  <button
+                    className={`item-chip ${RARITY_CLASS[item.rarity]}`}
+                    onClick={() => handleUse(item)}
+                    title="Click to use"
+                  >
+                    <span className="item-name">{item.name}</span>
+                    <span className="item-meta item-meta--use">
+                      {item.rarity} · Use
+                    </span>
+                    {item.buff && (
+                      <span className="item-mods">
+                        {item.buff.modifiers
+                          .map((m) =>
+                            m.kind === "flat"
+                              ? `+${m.value} ${m.attribute}`
+                              : `+${Math.round(m.value * 100)}% ${m.attribute}`,
+                          )
+                          .join(", ")}{" "}
+                        for {item.buff.duration} turns
+                      </span>
+                    )}
+                    {item.instantEffects && (
+                      <span className="item-mods">
+                        {item.instantEffects
+                          .map((e) => `Heal +${e.amount} ${e.attribute}`)
+                          .join(", ")}
+                      </span>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    className={`item-chip ${RARITY_CLASS[item.rarity]}`}
+                    onClick={() => handleEquip(item)}
+                    title={`Equip to ${item.slot}`}
+                  >
+                    <span className="item-name">{item.name}</span>
+                    <span className="item-meta">
+                      {item.rarity} ×{rarityMultiplier(item.rarity)} ·{" "}
+                      {item.slot}
+                    </span>
+                    <span className="item-mods">{formatModifiers(item)}</span>
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <button className="next-turn-btn" onClick={handleNextTurn}>
+        Next Turn
+      </button>
+      <button className="next-turn-btn" onClick={handleGenerateItem}>
+        Generate Item
+      </button>
+    </main>
+  );
+}
+
+export default App;
