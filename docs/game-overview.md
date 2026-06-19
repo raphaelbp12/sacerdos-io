@@ -12,8 +12,11 @@ we should start with only 1 group, created by default, and 1 character created b
   player owns).
 - a dedicated, scarcer currency is spent to buy characters and groups (see Economy).
 
-[PLACEHOLDER: how characters/groups are acquired (shop? drop? gacha?) and their cost]
-[PLACEHOLDER: capacity of the character inventory and the group inventory]
+groups and characters will be acquired from a shop, using a specific currency, but we will implement it later, no need to care about them now.
+
+let's say the player will be able to have 3 chars by default, being able to buy expansion
+
+and they will have 1 group by default, being able to buy expansion
 
 # character
 
@@ -50,9 +53,23 @@ attack
 - (physicalDamage \* (1 + physicalDamageIncreasePercentage))
 - (1 + damagePercentage)
 
-[PLACEHOLDER: how elemental damage adds into finalDamage (enemy-side for now)]
-[PLACEHOLDER: how `attack speed` and `cooldown reduction %` turn into DPS / skill rate]
-[PLACEHOLDER: how `area of effect` scales (radius? number of targets?)]
+element damage will only be applied with skills, basic attack inflicts physical damage only for now.
+
+finalElementDamage =
+
+- (1 + attackPercentage)
+- (elementDamage \* (1 + elementDamageIncreasePercentage))
+- (1 + damagePercentage)
+
+I think all the damages can be calculated with the same formula, it can receive which element it should use to calculate: physical/fire/cold/lightning/chaos
+
+attack speed: the char default is 1 attack per second, the modifiers will change it. let's say 1.1 attack per second will demand us to calculate the time between attacks later
+
+cooldown reduction: each skill will have a specific cooldown in milliseconds, the cooldown reduction percentage will reduce it
+
+area of effect: each skill will use it differently, but it might be mostly the radius.
+
+the range can be a different stats, modified directly
 
 ### defense / damage-taken order
 
@@ -67,14 +84,14 @@ applied in this order to each incoming hit:
 if the hit is not blocked or dodged, the damage actually received is **at minimum 1** after
 all the calculations above.
 
-[PLACEHOLDER: where elemental resist (fire/cold/lightning/chaos) sits in this order]
+elemental resist: the armor will reduce only the physical damage, it can be viewed as an elemental resist. the other elements will have individual resistances as attributes.
+
+then, we need to use the armor to calculate the "physical resist", then we use it as an elemental resistance
 
 ## classes
 
 each class will have a different path for the stats progress, it should be defined per class.
 for now, keep the knight's per-level progression simple: increase hp, attack and armor.
-
-[PLACEHOLDER: knight per-level stat table — how much hp / attack / armor gained per level]
 
 let's start with knight class
 classes will have different choices per level
@@ -84,6 +101,12 @@ lvl 1~10 -> 2 passives, 1 skill
 lvl 11~20 -> 2 passives, 1 skill
 lvl 21~30 -> 2 passives, 1 skill
 lvl 31~40 -> 2 passives, 1 skill
+
+### knight per-level stat table
+
+lvl 1 - 100 hp, 10 attack, 10 armor
+
++10 hp, +1 attack +3 armor per level
 
 ## level point choices
 
@@ -96,8 +119,7 @@ lvl 31~40 -> 2 passives, 1 skill
 - skills max out at level 5 (the 5 listed values); each level costs 1 skill point.
 - passives keep their per-level caps (see below); each level costs 1 skill point.
 
-[PLACEHOLDER: skill-point economy check — total points earned by lvl 40 vs. points needed to
-max a full build (is the scarcity intentional?)]
+skill-point scarcity intentional is intentional, we want the player to think carefully where to spend the points. also gives a flexibility, making it harder to find the most optimized way
 
 ## passives
 
@@ -114,18 +136,15 @@ increase armor - +15 per level - max 10
 skill damage is a multiplier of the **final damage of a basic attack** (see the damage
 formula above) — e.g. smash rank 1 deals 200% of a normal hit.
 
-(knight) smash - deal (200%/250%/300%/350%/400%) of a basic attack's final damage. melee, short range.
-(knight) slash - deal (100%/125%/150%/175%/200%) of a basic attack's final damage, in an area.
-(knight) raise shield - set block chance to 100% for the next (3/4/5/6/7) physical hits.
-(knight) provoke - apply a debuff that reduces (20%/30%/40%/50%/60%) of the target's defense. long range.
+(knight) smash - deal (200%/250%/300%/350%/400%) of a basic attack's final damage. melee, short range. - 3s cooldown
+(knight) shatter - deal (100%/125%/150%/175%/200%) of a basic attack's final damage, in an area. - 3s cooldown
+(knight) raise shield - set block chance to 100% for the next (3/4/5/6/7) physical hits. - 3s cooldown - no duration limit
+(knight) provoke - apply a debuff that reduces (20%/30%/40%/50%/60%) of the target's defense. long range. - debuff lasts forever - 3s cooldown
 
 buffs and debuffs share one mechanism — the only difference is which stat is modified and by
 how much (positive = buff, negative = debuff).
 
-[PLACEHOLDER: base cooldown for each skill (smash / slash / raise shield / provoke)]
-[PLACEHOLDER: raise shield duration — hit-count only, or also a timer?]
-[PLACEHOLDER: provoke debuff duration]
-[PLACEHOLDER: attack range values per skill (exact numbers for melee vs. long range)]
+I cannot define the range for each skill yet, we will need to test it live.
 
 # Runes
 
