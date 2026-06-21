@@ -48,7 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M12 — Death & revive** (done). Next up: ⬜ **M13 — Economy & gold**.
+**Current focus:** ✅ **M13 — Economy & gold** (done). Next up: ⬜ **M14 — Drop tables & chests**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -64,7 +64,7 @@ Do this, in order:
 | M10 | Battle engine (1D auto-battler)          | B     | ✅     | ✅    | —             |
 | M11 | Stages, acts, difficulties, boss keys    | B     | ✅     | ✅    | D-008 (rest)  |
 | M12 | Death & revive                           | B     | ✅     | ✅    | D-017 (sets)  |
-| M13 | Economy & gold                           | C     | ⬜     | ⬜    | —             |
+| M13 | Economy & gold                           | C     | ✅     | ✅    | —             |
 | M14 | Drop tables & chests                     | C     | ⬜     | ⬜    | D-005         |
 | M15 | Inventory & stash capacity               | C     | ⬜     | ⬜    | —             |
 | M16 | Item modifiers / gems                    | D     | ⬜     | ⬜    | D-001/002/003 |
@@ -506,6 +506,26 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-21 — M13 Economy & gold (complete)
+
+- **Did:** added the pure-domain `src/domain/economy/` module TDD-first (imports **nothing** from
+  other domain modules; nothing inner imports it). `gold.ts` (`GoldSource` =
+  `weakMonster`/`strongMonster`/`stageBoss`/`actBoss` — its **own** enum, distinct from XP's
+  `KillSource`, because gold splits weak vs strong; `BASE_GOLD` data 1/2/10/50;
+  `goldForKill(source, stageLevel, {flat,percent})` = `floor((base×stageLevel + flat)×(1+percent))`,
+  flat-then-percent like the stat engine; validates `stageLevel` int ≥ 1). `wallet.ts` (`Wallet`:
+  `balance` never negative; `add`/`spend`/`canAfford`; `spend` over balance **throws** and leaves
+  balance unchanged; non-negative finite amounts only). Headline tests green: act-1-1 weak = 1,
+  stage boss = 10×, strong = 2× weak, act boss = 50; linear stage scaling; spend > balance
+  rejected. **326 tests green (+18); lint + build pass.**
+- **Tracker change:** M13 ⬜→✅ (Status + Tests); steps 13.1–13.2 ticked. Plan:
+  `docs/milestone-13-economy-plan.md`.
+- **Deferrals:** D-026 (gold scaling / balance curve) appended — base values + linear scaling are
+  placeholders; endgame 1k/2k anchors need rune-tree (M18) + stage spread to tune against.
+- **Next action:** start **M14 — Drop tables & chests** (resolves D-005): author
+  `docs/milestone-14-*.md`; `chest-def.ts` + `drop-table.ts` (weighted rarity/type rolls via
+  `Rng`, first class-weapon drop 100%) then `chest-inventory.ts` (capacity-capped store).
 
 ### 2026-06-21 — M12 Death & revive (complete)
 

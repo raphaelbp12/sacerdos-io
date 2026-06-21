@@ -45,6 +45,7 @@
 | D-023 | Buff / debuff skills applied in-battle | M10         | Deferred | When combatants can carry dynamic modifier sources       |
 | D-024 | XP → level curve balancing             | M11         | Deferred | When leveling pace needs tuning against content          |
 | D-025 | Per-difficulty extra elements          | M11         | Deferred | When hard should add elements (e.g. act 2 → cold)        |
+| D-026 | Gold scaling / balance curve           | M13         | Deferred | When rune buffs (M18) + stage spread allow real tuning   |
 
 ---
 
@@ -297,6 +298,19 @@
   to feel meaningful against earnings, or when rune respawn-reduction perks (M18) interact with it.
 - **Related:** `instantReviveCost` in [src/domain/revive/revive-cost.ts](../src/domain/revive/revive-cost.ts);
   `tuning.ts` constants in [src/domain/revive/tuning.ts](../src/domain/revive/tuning.ts).
+
+### D-026 — Gold scaling / balance curve
+
+- **What:** The real gold numbers — base values per source, how gold scales across stages/acts,
+  and the per-source rune modifiers — so the overview's endgame anchors (a weak monster paying
+  `1k` and a strong one `2k` _with all buffs_) actually land.
+- **Why deferred (M13):** M13 ships `goldForKill(source, stageLevel, modifiers)` with exact early
+  anchors (act 1-1 weak = `1`, stage boss = `10×`, strong = `2×` weak, act boss = `50`) and a
+  simple **linear** stage scaling (`base × stageLevel`). The absolute endgame figures depend on
+  rune buffs (M18) and the full stage spread, which don't exist yet, so the curve is a placeholder.
+- **Revisit trigger:** When the rune tree (M18) supplies per-source gold modifiers and stages
+  span the whole game, so the gold-per-minute economy can be tuned end to end.
+- **Related:** `goldForKill` / `BASE_GOLD` in [src/domain/economy/gold.ts](../src/domain/economy/gold.ts).
 
 ---
 
