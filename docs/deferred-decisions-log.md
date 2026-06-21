@@ -22,25 +22,28 @@
 
 ## Index
 
-| ID    | Title                               | Deferred in | Status   | Revisit trigger (short)                              |
-| ----- | ----------------------------------- | ----------- | -------- | ---------------------------------------------------- |
-| D-001 | Affix system (prefixes/suffixes)    | M5          | Deferred | After combat makes loot quality matter               |
-| D-002 | Modifier value _ranges_ (min–max)   | M5          | Deferred | Alongside the affix system                           |
-| D-003 | Multiple modifiers per item         | M5          | Deferred | With affixes; count scales with rarity               |
-| D-004 | Named / unique items & crafting     | M5          | Deferred | After affixes; needs a baseline of item depth        |
-| D-005 | Drop tables / loot sources          | M5          | Deferred | When combat/enemies exist to drop loot               |
-| D-006 | Consumable generation               | M5          | Deferred | When consumables need variety beyond seed set        |
-| D-007 | Persistence (save / load)           | M5          | Deferred | When losing state between sessions becomes painful   |
-| D-008 | XP / leveling system                | pre-M6      | Deferred | When the player needs to _earn_ higher itemLevel     |
-| D-009 | Enemy / monster system              | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                 |
-| D-010 | Stat cache / memoization            | M1          | Deferred | Only if profiling shows getStat() is a hotspot       |
-| D-011 | Skills as class-gated buffs         | M3          | Resolved | Built in M8 (`src/domain/skills/`)                   |
-| D-012 | Advanced on-hit effects             | M6          | Deferred | When gear/skills need regen, leech, per-hit effects  |
-| D-013 | Additional classes beyond Knight    | M7          | Deferred | When a second class / class-select UI is wanted      |
-| D-014 | Enemy skill-casting                 | M8          | Deferred | When monsters need fireball / cold-bolt abilities    |
-| D-015 | Concrete skill ranges ("tune live") | M8          | Deferred | When the battle has positions (M10) to tune against  |
-| D-020 | Respec cost / cooldown              | M7          | Deferred | If free refunds make builds feel weightless          |
-| D-021 | Monster stat variance (rng roll)    | M9          | Deferred | When fights feel too uniform / need per-spawn spread |
+| ID    | Title                                  | Deferred in | Status   | Revisit trigger (short)                              |
+| ----- | -------------------------------------- | ----------- | -------- | ---------------------------------------------------- |
+| D-001 | Affix system (prefixes/suffixes)       | M5          | Deferred | After combat makes loot quality matter               |
+| D-002 | Modifier value _ranges_ (min–max)      | M5          | Deferred | Alongside the affix system                           |
+| D-003 | Multiple modifiers per item            | M5          | Deferred | With affixes; count scales with rarity               |
+| D-004 | Named / unique items & crafting        | M5          | Deferred | After affixes; needs a baseline of item depth        |
+| D-005 | Drop tables / loot sources             | M5          | Deferred | When combat/enemies exist to drop loot               |
+| D-006 | Consumable generation                  | M5          | Deferred | When consumables need variety beyond seed set        |
+| D-007 | Persistence (save / load)              | M5          | Deferred | When losing state between sessions becomes painful   |
+| D-008 | XP / leveling system                   | pre-M6      | Deferred | When the player needs to _earn_ higher itemLevel     |
+| D-009 | Enemy / monster system                 | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                 |
+| D-010 | Stat cache / memoization               | M1          | Deferred | Only if profiling shows getStat() is a hotspot       |
+| D-011 | Skills as class-gated buffs            | M3          | Resolved | Built in M8 (`src/domain/skills/`)                   |
+| D-012 | Advanced on-hit effects                | M6          | Deferred | When gear/skills need regen, leech, per-hit effects  |
+| D-013 | Additional classes beyond Knight       | M7          | Deferred | When a second class / class-select UI is wanted      |
+| D-014 | Enemy skill-casting                    | M8          | Deferred | When monsters need fireball / cold-bolt abilities    |
+| D-015 | Concrete skill ranges ("tune live")    | M8          | Deferred | When the battle has positions (M10) to tune against  |
+| D-020 | Respec cost / cooldown                 | M7          | Deferred | If free refunds make builds feel weightless          |
+| D-021 | Monster stat variance (rng roll)       | M9          | Deferred | When fights feel too uniform / need per-spawn spread |
+| D-016 | Battle visuals / formation UI / juice  | M10         | Deferred | When the battle needs a real-time view & polish      |
+| D-022 | Per-unit / stat-driven movement speed  | M10         | Deferred | When unit speed should differ (ranged kiting, haste) |
+| D-023 | Buff / debuff skills applied in-battle | M10         | Deferred | When combatants can carry dynamic modifier sources   |
 
 ---
 
@@ -218,6 +221,45 @@
 - **Revisit trigger:** When fights feel too uniform, or the battle engine (M10) wants per-spawn
   spread. `scaleMonster` can take an optional injected `Rng` without changing call sites.
 - **Related:** [src/domain/monsters/scale-monster.ts](../src/domain/monsters/scale-monster.ts).
+
+---
+
+### D-016 — Battle visuals / formation UI / juice
+
+- **What:** A real-time battlefield view (unit positions, HP bars, attack/skill animations,
+  damage numbers) and a formation-editing UI, plus general game-feel polish.
+- **Why deferred (M10):** M10 builds the **pure** battle engine (`tick`, targeting, movement,
+  waves) and verifies it with deterministic assertions. The outer shell can drive `tick` from a
+  `requestAnimationFrame`/interval loop later; visuals are an outer-layer concern that must not
+  leak into the pure domain.
+- **Revisit trigger:** When the engine is stable and a playable real-time view is wanted.
+- **Related:** [src/domain/battle/battle.ts](../src/domain/battle/battle.ts).
+
+### D-022 — Per-unit / stat-driven movement speed
+
+- **What:** Movement speed varies per unit (and reacts to stats — haste, slows, ranged kiting),
+  instead of one shared `MOVE_SPEED` constant.
+- **Why deferred (M10):** there is no move-speed stat, and the overview leaves ranges / kiting to
+  "tune live". A single constant is enough to prove the loop (closing distance, range checks).
+  `approach`/`stepFor` already take the step as a parameter, so per-unit speed slots in later
+  without engine changes.
+- **Revisit trigger:** When a ranged class wants to keep its distance, or haste/slow effects land.
+- **Related:** `MOVE_SPEED` in [src/domain/battle/tuning.ts](../src/domain/battle/tuning.ts).
+
+### D-023 — Buff / debuff skills applied in-battle (charges, provoke)
+
+- **What:** Auto-casting **buff** (raise-shield charges → `blockChance`) and **debuff** (provoke →
+  reduced defense) skills _during_ a battle, so they change the target's `getStat` mid-fight.
+- **Why deferred (M10):** M10 auto-casts only **damage / areaDamage** skills (smash, shatter),
+  which need no stat mutation. Buff/debuff in-battle requires combatants to carry **dynamic
+  modifier sources** (a `BuffTracker` / `ChargeTracker` folded into `getStat`) — characters can be
+  built with them, but `Monster`/`TrainingDummy` have frozen stats — plus a clamp rework (provoke
+  on a 0-defense monster currently clamps to no effect). The M8 resolvers (`resolveBuff`,
+  `resolveDebuff`) already exist; only the in-battle wiring is deferred.
+- **Revisit trigger:** When combatants gain dynamic modifier sources (or a battle-combatant
+  wrapper) so timed/charge effects can alter stats during the fight.
+- **Related:** `castSkills` in [src/domain/battle/battle.ts](../src/domain/battle/battle.ts);
+  `resolveBuff`/`resolveDebuff` in [src/domain/skills/resolve-skill.ts](../src/domain/skills/resolve-skill.ts).
 
 ---
 

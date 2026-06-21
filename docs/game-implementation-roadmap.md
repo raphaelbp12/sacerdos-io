@@ -48,8 +48,8 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M9 — Monster / enemy system** (done). Next up: ⬜ **M10 — Battle
-engine (1D auto-battler)**.
+**Current focus:** ✅ **M10 — Battle engine (1D auto-battler)** (done). Next up: ⬜ **M11 —
+Stages, acts, difficulties, boss keys**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -62,7 +62,7 @@ engine (1D auto-battler)**.
 | M7  | Class + levels + skill points + passives | A     | ✅     | ✅    | D-008 (part)  |
 | M8  | Skills as class-gated abilities          | A     | ✅     | ✅    | D-011         |
 | M9  | Monster / enemy system                   | B     | ✅     | ✅    | D-009         |
-| M10 | Battle engine (1D auto-battler)          | B     | ⬜     | ⬜    | —             |
+| M10 | Battle engine (1D auto-battler)          | B     | ✅     | ✅    | —             |
 | M11 | Stages, acts, difficulties, boss keys    | B     | ⬜     | ⬜    | D-008 (rest)  |
 | M12 | Death & revive                           | B     | ⬜     | ⬜    | —             |
 | M13 | Economy & gold                           | C     | ⬜     | ⬜    | —             |
@@ -507,6 +507,32 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-21 — M10 Battle engine (1D auto-battler) (complete)
+
+- **Did:** added the pure-domain `src/domain/battle/` module TDD-first (imports combat + skills +
+  monsters + clock + rng; nothing inner imports it). `tuning.ts` (all battle constants in one
+  place: `MOVE_SPEED`, `BASIC_ATTACK_RANGE`, `SKILL_RANGE` placeholders, spawn positions).
+  `battlefield.ts` (pure geometry: `advanceDirection`, `distance`, `stepFor`, `frontMost` =
+  party-min-x / enemy-max-x, `approach` = move toward a target but stop `range` short, never
+  overshoot). `battle-unit.ts` (`BattleUnit` wraps a `Combatant` with side/x/attack-timer/
+  engageRange/`attackElement`/skill loadout/`CooldownTracker`). `battle.ts` (`Battle implements
+Clock`; locked `tick`: cooldowns → move party then enemies → act (skills before basics) → status;
+  front-to-back focus fire; basic attacks paced by `timeBetweenAttacks` via `Rng`; auto-casts
+  damage/areaDamage skills, areaDamage fans out to all foes in radius). `stage-runner.ts`
+  (`StageRunner implements Clock`: persistent party through ordered `Monster[]` waves → boss =
+  last wave; `cleared`/`wiped`; party HP persists across waves; decoupled from M11's stage schema).
+  Headline tests green: melee closes / ranged stops at range; same seed → identical HP trace;
+  party clears a 1-monster wave; party wipes vs an overtuned monster; N waves then boss →
+  `cleared` with fixed monster count. **257 tests green (+25); lint + build pass.**
+- **Tracker change:** M10 ⬜→✅ (Status + Tests); steps 10.1–10.3 ticked. Plan:
+  `docs/milestone-10-battle-plan.md`. (UI step 10.4 left to the outer shell — D-016.)
+- **Deferrals:** D-016 (battle visuals/UI), D-022 (per-unit/stat movement speed), D-023
+  (buff/debuff skills applied in-battle) appended. Note: the ×3 boss multiplier is brutal under
+  the multiplicative damage formula — a balance concern for M11, not an engine bug.
+- **Next action:** start **M11 — Stages, acts, difficulties, boss keys**: author
+  `docs/milestone-11-*.md`; `stage-def.ts`/`act-def.ts` (data) _producing_ the `Monster[]` waves
+  the `StageRunner` already consumes; `progression.ts`; `boss-key.ts`; XP-on-kill (rest of D-008).
 
 ### 2026-06-21 — M9 Monster / enemy system (complete)
 
