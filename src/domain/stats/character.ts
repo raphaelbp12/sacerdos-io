@@ -55,6 +55,14 @@ export class Character {
   }
 
   /**
+   * Restores currentHP to full (maxHP). Used by the revive system (M12) when a
+   * downed member respawns or the group is revived at stage start.
+   */
+  revive(): void {
+    this._currentHP = this.getStat("hp");
+  }
+
+  /**
    * Applies all effects from a consumable item.
    * Throws if the item is not a consumable.
    */

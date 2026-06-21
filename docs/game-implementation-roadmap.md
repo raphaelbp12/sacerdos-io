@@ -48,8 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M11 — Stages, acts, difficulties, boss keys** (done). Next up: ⬜ **M12 —
-Death & revive**.
+**Current focus:** ✅ **M12 — Death & revive** (done). Next up: ⬜ **M13 — Economy & gold**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -64,7 +63,7 @@ Death & revive**.
 | M9  | Monster / enemy system                   | B     | ✅     | ✅    | D-009         |
 | M10 | Battle engine (1D auto-battler)          | B     | ✅     | ✅    | —             |
 | M11 | Stages, acts, difficulties, boss keys    | B     | ✅     | ✅    | D-008 (rest)  |
-| M12 | Death & revive                           | B     | ⬜     | ⬜    | —             |
+| M12 | Death & revive                           | B     | ✅     | ✅    | D-017 (sets)  |
 | M13 | Economy & gold                           | C     | ⬜     | ⬜    | —             |
 | M14 | Drop tables & chests                     | C     | ⬜     | ⬜    | D-005         |
 | M15 | Inventory & stash capacity               | C     | ⬜     | ⬜    | —             |
@@ -507,6 +506,28 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-21 — M12 Death & revive (complete)
+
+- **Did:** added the pure-domain `src/domain/revive/` module TDD-first (imports `clock` only;
+  nothing inner imports it; works against a minimal `Revivable` contract, never the concrete
+  `Character`/`Monster`). `tuning.ts` (`BASE_RESPAWN_MS=120_000`, `MIN_RESPAWN_MS=0`, instant-
+  revive placeholder constants). `respawn.ts` (`Revivable {currentHP, revive()}`; `isDowned` =
+  `currentHP<=0`; `effectiveRespawnMs({flatMs,percent})` = `(BASE−flat)×(1−percent)` floored at 0,
+  same flat-then-percent order as the stat engine; `RespawnQueue implements Clock` — `down`
+  (idempotent), `isPending`/`remainingFor`/`pendingCount`, `advance` decrements & at ≤0 calls
+  `revive()` + dequeues). `revive-all.ts` (`reviveAll(members)` full-restores the whole group).
+  `revive-cost.ts` (`instantReviveCost(level)` = `50 + 10×(L−1)` placeholder, D-017). Added a
+  one-line `Character.revive()` (restore `currentHP`→`maxHP`) so the real group type satisfies
+  `Revivable`. Headline tests green: timer counts down via `advance` and revives at 0; reduction
+  shortens it; revive-all restores dead + hurt members; idempotent `down`. **308 tests green
+  (+14); lint + build pass.**
+- **Tracker change:** M12 ⬜→✅ (Status + Tests); steps 12.1–12.3 ticked. Plan:
+  `docs/milestone-12-revive-plan.md`.
+- **Deferrals:** D-017 (paid-revive cost balancing) logged — the cost formula is a placeholder.
+- **Next action:** start **M13 — Economy & gold**: author `docs/milestone-13-*.md`; `gold.ts`
+  (`goldForKill(source, stageLevel, modifiers)` — act-1-1 monster = 1, boss = 10×) then
+  `wallet.ts` (add/spend, never negative).
 
 ### 2026-06-21 — M11 Stages, acts, difficulties, boss keys (complete)
 

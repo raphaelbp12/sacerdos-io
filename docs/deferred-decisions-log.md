@@ -23,7 +23,7 @@
 ## Index
 
 | ID    | Title                                  | Deferred in | Status   | Revisit trigger (short)                                  |
-| ----- | -------------------------------------- | ----------- | -------- | -------------------------------------------------------- |
+| ----- | -------------------------------------- | ----------- | -------- | -------------------------------------------------------- | --- | ----- | -------------------------- | --- | -------- | ------------------------------------------------- | --- | ----- | ------------------------------------- | --- | -------- | ---------------------------------------------------- |
 | D-001 | Affix system (prefixes/suffixes)       | M5          | Deferred | After combat makes loot quality matter                   |
 | D-002 | Modifier value _ranges_ (min–max)      | M5          | Deferred | Alongside the affix system                               |
 | D-003 | Multiple modifiers per item            | M5          | Deferred | With affixes; count scales with rarity                   |
@@ -41,8 +41,7 @@
 | D-015 | Concrete skill ranges ("tune live")    | M8          | Deferred | When the battle has positions (M10) to tune against      |
 | D-020 | Respec cost / cooldown                 | M7          | Deferred | If free refunds make builds feel weightless              |
 | D-021 | Monster stat variance (rng roll)       | M9          | Deferred | When fights feel too uniform / need per-spawn spread     |
-| D-016 | Battle visuals / formation UI / juice  | M10         | Deferred | When the battle needs a real-time view & polish          |
-| D-022 | Per-unit / stat-driven movement speed  | M10         | Deferred | When unit speed should differ (ranged kiting, haste)     |
+| D-016 | Battle visuals / formation UI / juice  | M10         | Deferred | When the battle needs a real-time view & polish          |     | D-017 | Paid-revive cost balancing | M12 | Deferred | When the revive economy needs real pricing/tuning |     | D-022 | Per-unit / stat-driven movement speed | M10 | Deferred | When unit speed should differ (ranged kiting, haste) |
 | D-023 | Buff / debuff skills applied in-battle | M10         | Deferred | When combatants can carry dynamic modifier sources       |
 | D-024 | XP → level curve balancing             | M11         | Deferred | When leveling pace needs tuning against content          |
 | D-025 | Per-difficulty extra elements          | M11         | Deferred | When hard should add elements (e.g. act 2 → cold)        |
@@ -285,6 +284,19 @@
   e.g. hard introducing a new element the player must resist.
 - **Related:** `allowedElements` in [src/domain/stages/act-def.ts](../src/domain/stages/act-def.ts);
   `DifficultyDef` in [src/domain/stages/difficulty.ts](../src/domain/stages/difficulty.ts).
+
+### D-017 — Paid-revive cost balancing
+
+- **What:** The real gold price (and any scaling / caps / diminishing returns) for instantly
+  reviving a downed member instead of waiting out its respawn timer.
+- **Why deferred (M12):** M12 ships the respawn mechanic (`RespawnQueue`, the `Clock`-driven
+  2-minute timer, flat+% reduction) and revive-all at stage start. The instant-revive hook
+  exists as a **placeholder** `instantReviveCost(level) = 50 + 10 × (level − 1)` so the "spend
+  gold to skip the wait" path is wired, but the numbers are not balanced against the economy.
+- **Revisit trigger:** When gold (M13) and the revive flow surface in the UI and the price needs
+  to feel meaningful against earnings, or when rune respawn-reduction perks (M18) interact with it.
+- **Related:** `instantReviveCost` in [src/domain/revive/revive-cost.ts](../src/domain/revive/revive-cost.ts);
+  `tuning.ts` constants in [src/domain/revive/tuning.ts](../src/domain/revive/tuning.ts).
 
 ---
 
