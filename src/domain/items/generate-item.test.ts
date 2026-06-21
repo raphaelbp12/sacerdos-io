@@ -159,7 +159,10 @@ describe("generateItem", () => {
   describe("forced base / rarity options", () => {
     it("forces the given base", () => {
       const plate = ITEM_BASES.find((b) => b.id === "plate-body")!;
-      const item = generateItem(new SeededRng(1), { itemLevel: 10, base: plate });
+      const item = generateItem(new SeededRng(1), {
+        itemLevel: 10,
+        base: plate,
+      });
       expect(item.name).toBe("Plate Body");
       expect(item.slot).toBe("body");
     });
