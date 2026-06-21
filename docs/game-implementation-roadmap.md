@@ -48,8 +48,8 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M7 — Class + levels + skill points + passives** (done). Next up: ⬜ **M8
-— Skills as class-gated abilities**.
+**Current focus:** ✅ **M8 — Skills as class-gated abilities** (done). Next up: ⬜ **M9 —
+Monster / enemy system**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -60,7 +60,7 @@ Do this, in order:
 | M5  | Procedural item generation               | core  | ✅     | ✅    | —             |
 | M6  | Canonical stats + damage + defense       | A     | ✅     | ✅    | sets up D-009 |
 | M7  | Class + levels + skill points + passives | A     | ✅     | ✅    | D-008 (part)  |
-| M8  | Skills as class-gated abilities          | A     | ⬜     | ⬜    | D-011         |
+| M8  | Skills as class-gated abilities          | A     | ✅     | ✅    | D-011         |
 | M9  | Monster / enemy system                   | B     | ⬜     | ⬜    | D-009         |
 | M10 | Battle engine (1D auto-battler)          | B     | ⬜     | ⬜    | —             |
 | M11 | Stages, acts, difficulties, boss keys    | B     | ⬜     | ⬜    | D-008 (rest)  |
@@ -507,6 +507,27 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-21 — M8 Skills as class-gated abilities (complete)
+
+- **Did:** added the pure-domain `src/domain/skills/` module TDD-first (sits above
+  combat + character + effects; nothing inner imports it). `skill-def.ts` merges combat data
+  (`kind`, `cooldownMs`, `range`, `element`, per-rank `values`) onto M7's `KNIGHT_SKILL_NODES`
+  so band/maxRank stay single-sourced — `KNIGHT_SKILLS` = smash (damage 200–400%), shatter
+  (areaDamage 100–200%), raise-shield (buff, 3–7 charges), provoke (debuff, −0.20…−0.60
+  `damageReduction`); all 3 s cd. `cooldown-tracker.ts` (`CooldownTracker implements Clock`,
+  `effectiveCooldown`-aware, ms). `charge-tracker.ts` (`ChargeTracker implements ModifierSource`
+  for "next N hits", SRP sibling of `BuffTracker`). `resolve-skill.ts` reuses M6 by extracting an
+  exported `basicHitDamage` from `resolveAttack`: `resolveSkillDamage` = multiplier × mitigated
+  basic; `resolveDebuff` applies a permanent (`duration: Infinity`) `BuffTracker` debuff;
+  `resolveBuff` applies the charge buff (flat `+1` blockChance, clamped to 1). Confirmed with
+  design: provoke → generic `damageReduction`; ChargeTracker for raise-shield + BuffTracker
+  ∞ for provoke; shatter single-target now. **220 tests green (+28); lint + build pass.**
+- **Tracker change:** M8 ⬜→✅ (Status + Tests); steps 8.1–8.4 all ticked.
+- **Deferrals:** D-014 (enemy skill-casting) and D-015 (concrete skill ranges) appended; D-011
+  resolved.
+- **Next action:** start **M9 — Monster / enemy system**: author `docs/milestone-9-*.md`; a
+  `Monster` implements the `Combatant` contract with canonical stats scaled by stage level.
 
 ### 2026-06-21 — M7 Class + levels + skill points + passives (complete)
 

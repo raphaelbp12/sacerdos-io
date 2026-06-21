@@ -24,5 +24,9 @@ export type { DefenseInputs } from "./mitigation";
 export { asCombatant } from "./combatant";
 export type { Combatant } from "./combatant";
 export { TrainingDummy } from "./training-dummy";
-export { resolveAttack, ELEMENT_RESIST_STAT } from "./resolve-attack";
+export {
+  resolveAttack,
+  basicHitDamage,
+  ELEMENT_RESIST_STAT,
+} from "./resolve-attack";
 export type { AttackResult } from "./resolve-attack";

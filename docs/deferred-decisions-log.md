@@ -22,22 +22,24 @@
 
 ## Index
 
-| ID    | Title                             | Deferred in | Status   | Revisit trigger (short)                             |
-| ----- | --------------------------------- | ----------- | -------- | --------------------------------------------------- |
-| D-001 | Affix system (prefixes/suffixes)  | M5          | Deferred | After combat makes loot quality matter              |
-| D-002 | Modifier value _ranges_ (min–max) | M5          | Deferred | Alongside the affix system                          |
-| D-003 | Multiple modifiers per item       | M5          | Deferred | With affixes; count scales with rarity              |
-| D-004 | Named / unique items & crafting   | M5          | Deferred | After affixes; needs a baseline of item depth       |
-| D-005 | Drop tables / loot sources        | M5          | Deferred | When combat/enemies exist to drop loot              |
-| D-006 | Consumable generation             | M5          | Deferred | When consumables need variety beyond seed set       |
-| D-007 | Persistence (save / load)         | M5          | Deferred | When losing state between sessions becomes painful  |
-| D-008 | XP / leveling system              | pre-M6      | Deferred | When the player needs to _earn_ higher itemLevel    |
-| D-009 | Enemy / monster system            | pre-M6      | Deferred | Folded into M6 as a minimal "training dummy"        |
-| D-010 | Stat cache / memoization          | M1          | Deferred | Only if profiling shows getStat() is a hotspot      |
-| D-011 | Skills as class-gated buffs       | M3          | Deferred | When a class system or skill UI is wanted           |
-| D-012 | Advanced on-hit effects           | M6          | Deferred | When gear/skills need regen, leech, per-hit effects |
-| D-013 | Additional classes beyond Knight  | M7          | Deferred | When a second class / class-select UI is wanted     |
-| D-020 | Respec cost / cooldown            | M7          | Deferred | If free refunds make builds feel weightless         |
+| ID    | Title                               | Deferred in | Status   | Revisit trigger (short)                             |
+| ----- | ----------------------------------- | ----------- | -------- | --------------------------------------------------- |
+| D-001 | Affix system (prefixes/suffixes)    | M5          | Deferred | After combat makes loot quality matter              |
+| D-002 | Modifier value _ranges_ (min–max)   | M5          | Deferred | Alongside the affix system                          |
+| D-003 | Multiple modifiers per item         | M5          | Deferred | With affixes; count scales with rarity              |
+| D-004 | Named / unique items & crafting     | M5          | Deferred | After affixes; needs a baseline of item depth       |
+| D-005 | Drop tables / loot sources          | M5          | Deferred | When combat/enemies exist to drop loot              |
+| D-006 | Consumable generation               | M5          | Deferred | When consumables need variety beyond seed set       |
+| D-007 | Persistence (save / load)           | M5          | Deferred | When losing state between sessions becomes painful  |
+| D-008 | XP / leveling system                | pre-M6      | Deferred | When the player needs to _earn_ higher itemLevel    |
+| D-009 | Enemy / monster system              | pre-M6      | Deferred | Folded into M6 as a minimal "training dummy"        |
+| D-010 | Stat cache / memoization            | M1          | Deferred | Only if profiling shows getStat() is a hotspot      |
+| D-011 | Skills as class-gated buffs         | M3          | Resolved | Built in M8 (`src/domain/skills/`)                  |
+| D-012 | Advanced on-hit effects             | M6          | Deferred | When gear/skills need regen, leech, per-hit effects |
+| D-013 | Additional classes beyond Knight    | M7          | Deferred | When a second class / class-select UI is wanted     |
+| D-014 | Enemy skill-casting                 | M8          | Deferred | When monsters need fireball / cold-bolt abilities   |
+| D-015 | Concrete skill ranges ("tune live") | M8          | Deferred | When the battle has positions (M10) to tune against |
+| D-020 | Respec cost / cooldown              | M7          | Deferred | If free refunds make builds feel weightless         |
 
 ---
 
@@ -140,6 +142,12 @@
 - **Why deferred (M3):** No class system or skill UI yet; the buff machinery exists but is
   only triggered by consumables.
 - **Revisit trigger:** When a class system or an active-skill UI is desired.
+- **Status:** **Resolved (M8).** The Knight's four skills are data-defined in
+  [src/domain/skills/skill-def.ts](../src/domain/skills/skill-def.ts) (`KNIGHT_SKILLS`, gated by
+  the M7 band model). Resolution reuses M6's mitigated `basicHitDamage` (smash/shatter as a
+  multiplier), `BuffTracker` with `duration: Infinity` for the permanent provoke debuff, and a
+  new charge-based `ChargeTracker` for raise-shield's "next N hits". Cooldowns run on an injected
+  `Clock` via `CooldownTracker`.
 
 ### D-012 — Advanced on-hit effects (regen, leech, per-hit/kill)
 
@@ -163,6 +171,28 @@
 - **Revisit trigger:** When combat/roster (M10/M19) make a second archetype desirable, or a
   class-select screen is built.
 - **Related:** `CLASSES` in [src/domain/character/class-def.ts](../src/domain/character/class-def.ts).
+
+### D-014 — Enemy skill-casting (fireball / cold-bolt)
+
+- **What:** Monsters cast skills of their own (the overview hints at fireball / cold-bolt as
+  enemy abilities), not just basic attacks.
+- **Why deferred (M8):** M8 builds **player** skills (the Knight's four) on the `Combatant`
+  contract. Enemy AI and an enemy skill catalog need the monster system (M9) and the battle
+  engine's targeting/tick (M10) to be meaningful; the skill-resolution machinery
+  (`resolveSkillDamage` / trackers) is already generic over `Combatant`, so a monster can reuse
+  it later with no engine change.
+- **Revisit trigger:** When monsters (M9) and the battle loop (M10) exist and enemies need
+  threatening abilities.
+
+### D-015 — Concrete skill ranges ("tune live")
+
+- **What:** Real distances for each skill (smash short, provoke long, shatter's area radius via
+  `areaOfEffect`), instead of the coarse `SkillRange` tag (`self`/`short`/`long`/`area`).
+- **Why deferred (M8):** the overview explicitly says "I cannot define the range for each skill
+  yet, we will need to test it live." There are no positions to tune against until the 1D
+  battlefield (M10) exists; M8 keeps `range` as a tag on `SkillDef`.
+- **Revisit trigger:** When the battle engine (M10) introduces positions and range checks.
+- **Related:** `SkillRange` in [src/domain/skills/skill-def.ts](../src/domain/skills/skill-def.ts).
 
 ### D-020 — Respec cost / cooldown
 

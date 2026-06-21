@@ -57,6 +57,21 @@ function defenseFor(
   };
 }
 
+/**
+ * The mitigated (post-defense) damage a basic attack from `attacker` would deal
+ * to `defender`, **before** avoidance (block/dodge). This is the single damage
+ * path reused by both `resolveAttack` and skill resolution (skills are defined
+ * as a multiplier of "a basic attack's final damage").
+ */
+export function basicHitDamage(
+  attacker: Combatant,
+  defender: Combatant,
+  element: DamageElement = "physical",
+): number {
+  const raw = hitDamageFromStats((stat) => attacker.getStat(stat), element);
+  return mitigate(raw, element, defenseFor(defender, element));
+}
+
 export function resolveAttack(
   attacker: Combatant,
   defender: Combatant,
@@ -86,8 +101,7 @@ export function resolveAttack(
   }
 
   // 2. Damage → mitigation → apply.
-  const raw = hitDamageFromStats((stat) => attacker.getStat(stat), element);
-  const damage = mitigate(raw, element, defenseFor(defender, element));
+  const damage = basicHitDamage(attacker, defender, element);
   defender.takeDamage(damage);
 
   return {
