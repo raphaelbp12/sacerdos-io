@@ -36,6 +36,8 @@
 | D-010 | Stat cache / memoization          | M1          | Deferred | Only if profiling shows getStat() is a hotspot      |
 | D-011 | Skills as class-gated buffs       | M3          | Deferred | When a class system or skill UI is wanted           |
 | D-012 | Advanced on-hit effects           | M6          | Deferred | When gear/skills need regen, leech, per-hit effects |
+| D-013 | Additional classes beyond Knight  | M7          | Deferred | When a second class / class-select UI is wanted     |
+| D-020 | Respec cost / cooldown            | M7          | Deferred | If free refunds make builds feel weightless         |
 
 ---
 
@@ -149,6 +151,28 @@
   richer effect-trigger system to be meaningful; adding them now would be untested machinery.
 - **Revisit trigger:** When the battle engine (M10) ticks combat over time and item modifiers
   (M16) introduce leech/regen affixes.
+
+### D-013 — Additional classes beyond Knight
+
+- **What:** More playable classes (mage, ranger, …), each with its own per-level stat path and
+  its own passive/skill choice nodes per band.
+- **Why deferred (M7):** the overview says "let's start with one single class." M7 built the
+  class system as **data** (`CLASSES` is a list; `ClassDef` carries the stat table; passive /
+  skill nodes are keyed by band), so adding a class is new data, not engine work — there is no
+  reason to author more classes before combat proves the Knight is fun.
+- **Revisit trigger:** When combat/roster (M10/M19) make a second archetype desirable, or a
+  class-select screen is built.
+- **Related:** `CLASSES` in [src/domain/character/class-def.ts](../src/domain/character/class-def.ts).
+
+### D-020 — Respec cost / cooldown
+
+- **What:** A price (gold, a currency, or a time cooldown) for refunding and re-spending skill
+  points, instead of the current free, instant re-spec.
+- **Why deferred (M7):** the overview explicitly wants free refunds in v1 ("points can be
+  refunded at any time") to encourage experimentation. `Build.refund` is a pure operation, so a
+  cost layer can wrap it later without touching the allocation rules.
+- **Revisit trigger:** If economy tuning (M13) or balance shows free re-spec trivializes builds.
+- **Related:** `Build.refund` in [src/domain/character/skill-points.ts](../src/domain/character/skill-points.ts).
 
 ---
 

@@ -48,8 +48,8 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M6 — Canonical stats + damage + defense** (done). Next up: ⬜ **M7
-— Class + levels + skill points + passives**.
+**Current focus:** ✅ **M7 — Class + levels + skill points + passives** (done). Next up: ⬜ **M8
+— Skills as class-gated abilities**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -59,7 +59,7 @@ Do this, in order:
 | M4  | Rarity scaling                           | core  | ✅     | ✅    | —             |
 | M5  | Procedural item generation               | core  | ✅     | ✅    | —             |
 | M6  | Canonical stats + damage + defense       | A     | ✅     | ✅    | sets up D-009 |
-| M7  | Class + levels + skill points + passives | A     | ⬜     | ⬜    | D-008 (part)  |
+| M7  | Class + levels + skill points + passives | A     | ✅     | ✅    | D-008 (part)  |
 | M8  | Skills as class-gated abilities          | A     | ⬜     | ⬜    | D-011         |
 | M9  | Monster / enemy system                   | B     | ⬜     | ⬜    | D-009         |
 | M10 | Battle engine (1D auto-battler)          | B     | ⬜     | ⬜    | —             |
@@ -507,6 +507,24 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-21 — M7 Class + levels + skill points + passives (complete)
+
+- **Did:** added the pure-domain `src/domain/character/` module TDD-first: `class-def.ts`
+  (`KNIGHT` per-level stat table), `level.ts` (`baseStatsForLevel` = base + gain·(L−1)),
+  `choice-node.ts` (shared `Band`/`ChoiceNode` + band-unlock helpers), `passive-def.ts`
+  (7 Knight passives as data, 2/2/2/1 band split; `PassiveAllocation` is a `ModifierSource`),
+  `skill-node.ts` (4 skills registered as band-gated rank-5 nodes; effects deferred to M8),
+  `skill-points.ts` (`Build`: 1 point/level, spend/refund freely, band-unlock + max-rank +
+  budget enforcement; itself a live `ModifierSource`), and `create-character.ts`
+  (`createCharacter` composes class+level base stats + the build + extra sources). Confirmed
+  with design: explicit band fields, 2/2/2/1 passive split, 1 skill/band, elem-resist passive
+  hits all 4 resists. **192 tests green (+35); lint + build pass.**
+- **Tracker change:** M7 🟡→✅ (Status + Tests); steps 7.1–7.5 all ticked.
+- **Deferrals:** D-013 (additional classes) and D-020 (respec cost) appended. D-008 partially
+  delivered (level → base-stat curve); XP earning still pending (M11).
+- **Next action:** start **M8 — Skills as class-gated abilities**: author
+  `docs/milestone-8-*.md`, reuse `KNIGHT_SKILL_NODES` + `BuffTracker` + `computeHitDamage`.
 
 ### 2026-06-21 — M6 Canonical stats + damage + defense (complete)
 
