@@ -22,24 +22,25 @@
 
 ## Index
 
-| ID    | Title                               | Deferred in | Status   | Revisit trigger (short)                             |
-| ----- | ----------------------------------- | ----------- | -------- | --------------------------------------------------- |
-| D-001 | Affix system (prefixes/suffixes)    | M5          | Deferred | After combat makes loot quality matter              |
-| D-002 | Modifier value _ranges_ (min–max)   | M5          | Deferred | Alongside the affix system                          |
-| D-003 | Multiple modifiers per item         | M5          | Deferred | With affixes; count scales with rarity              |
-| D-004 | Named / unique items & crafting     | M5          | Deferred | After affixes; needs a baseline of item depth       |
-| D-005 | Drop tables / loot sources          | M5          | Deferred | When combat/enemies exist to drop loot              |
-| D-006 | Consumable generation               | M5          | Deferred | When consumables need variety beyond seed set       |
-| D-007 | Persistence (save / load)           | M5          | Deferred | When losing state between sessions becomes painful  |
-| D-008 | XP / leveling system                | pre-M6      | Deferred | When the player needs to _earn_ higher itemLevel    |
-| D-009 | Enemy / monster system              | pre-M6      | Deferred | Folded into M6 as a minimal "training dummy"        |
-| D-010 | Stat cache / memoization            | M1          | Deferred | Only if profiling shows getStat() is a hotspot      |
-| D-011 | Skills as class-gated buffs         | M3          | Resolved | Built in M8 (`src/domain/skills/`)                  |
-| D-012 | Advanced on-hit effects             | M6          | Deferred | When gear/skills need regen, leech, per-hit effects |
-| D-013 | Additional classes beyond Knight    | M7          | Deferred | When a second class / class-select UI is wanted     |
-| D-014 | Enemy skill-casting                 | M8          | Deferred | When monsters need fireball / cold-bolt abilities   |
-| D-015 | Concrete skill ranges ("tune live") | M8          | Deferred | When the battle has positions (M10) to tune against |
-| D-020 | Respec cost / cooldown              | M7          | Deferred | If free refunds make builds feel weightless         |
+| ID    | Title                               | Deferred in | Status   | Revisit trigger (short)                              |
+| ----- | ----------------------------------- | ----------- | -------- | ---------------------------------------------------- |
+| D-001 | Affix system (prefixes/suffixes)    | M5          | Deferred | After combat makes loot quality matter               |
+| D-002 | Modifier value _ranges_ (min–max)   | M5          | Deferred | Alongside the affix system                           |
+| D-003 | Multiple modifiers per item         | M5          | Deferred | With affixes; count scales with rarity               |
+| D-004 | Named / unique items & crafting     | M5          | Deferred | After affixes; needs a baseline of item depth        |
+| D-005 | Drop tables / loot sources          | M5          | Deferred | When combat/enemies exist to drop loot               |
+| D-006 | Consumable generation               | M5          | Deferred | When consumables need variety beyond seed set        |
+| D-007 | Persistence (save / load)           | M5          | Deferred | When losing state between sessions becomes painful   |
+| D-008 | XP / leveling system                | pre-M6      | Deferred | When the player needs to _earn_ higher itemLevel     |
+| D-009 | Enemy / monster system              | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                 |
+| D-010 | Stat cache / memoization            | M1          | Deferred | Only if profiling shows getStat() is a hotspot       |
+| D-011 | Skills as class-gated buffs         | M3          | Resolved | Built in M8 (`src/domain/skills/`)                   |
+| D-012 | Advanced on-hit effects             | M6          | Deferred | When gear/skills need regen, leech, per-hit effects  |
+| D-013 | Additional classes beyond Knight    | M7          | Deferred | When a second class / class-select UI is wanted      |
+| D-014 | Enemy skill-casting                 | M8          | Deferred | When monsters need fireball / cold-bolt abilities    |
+| D-015 | Concrete skill ranges ("tune live") | M8          | Deferred | When the battle has positions (M10) to tune against  |
+| D-020 | Respec cost / cooldown              | M7          | Deferred | If free refunds make builds feel weightless          |
+| D-021 | Monster stat variance (rng roll)    | M9          | Deferred | When fights feel too uniform / need per-spawn spread |
 
 ---
 
@@ -126,6 +127,9 @@
   enemy AI, and encounter design are out of scope until the core combat resolve is proven.
 - **Revisit trigger:** Once the M6 combat tick works and we want real opponents and drop
   sources (ties to D-005).
+- **Resolved (M9):** `src/domain/monsters/` adds `MonsterDef` data rows (`MONSTER_BASES`) and
+  `scaleMonster`/`scaleBoss`, producing a `Monster` that implements the `Combatant` contract.
+  Full bestiary, enemy AI, and skill-casting (D-014) remain out of scope until M10/M11.
 
 ### D-010 — Stat cache / memoization
 
@@ -203,6 +207,17 @@
   cost layer can wrap it later without touching the allocation rules.
 - **Revisit trigger:** If economy tuning (M13) or balance shows free re-spec trivializes builds.
 - **Related:** `Build.refund` in [src/domain/character/skill-points.ts](../src/domain/character/skill-points.ts).
+
+### D-021 — Monster stat variance (rng roll)
+
+- **What:** Per-spawn randomized variance on a monster's scaled stats (e.g. a small ± roll on
+  hp/attack) so two spawns of the same archetype at the same level differ slightly.
+- **Why deferred (M9):** M9 keeps `scaleMonster` **fully deterministic** (no `Rng` param) to
+  ship the data-driven scaling + `Combatant` conformance with reproducible tests. The roadmap's
+  `scaleMonster(base, level, rng)` signature dropped `rng` accordingly.
+- **Revisit trigger:** When fights feel too uniform, or the battle engine (M10) wants per-spawn
+  spread. `scaleMonster` can take an optional injected `Rng` without changing call sites.
+- **Related:** [src/domain/monsters/scale-monster.ts](../src/domain/monsters/scale-monster.ts).
 
 ---
 

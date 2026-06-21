@@ -48,8 +48,8 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M8 — Skills as class-gated abilities** (done). Next up: ⬜ **M9 —
-Monster / enemy system**.
+**Current focus:** ✅ **M9 — Monster / enemy system** (done). Next up: ⬜ **M10 — Battle
+engine (1D auto-battler)**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -61,7 +61,7 @@ Monster / enemy system**.
 | M6  | Canonical stats + damage + defense       | A     | ✅     | ✅    | sets up D-009 |
 | M7  | Class + levels + skill points + passives | A     | ✅     | ✅    | D-008 (part)  |
 | M8  | Skills as class-gated abilities          | A     | ✅     | ✅    | D-011         |
-| M9  | Monster / enemy system                   | B     | ⬜     | ⬜    | D-009         |
+| M9  | Monster / enemy system                   | B     | ✅     | ✅    | D-009         |
 | M10 | Battle engine (1D auto-battler)          | B     | ⬜     | ⬜    | —             |
 | M11 | Stages, acts, difficulties, boss keys    | B     | ⬜     | ⬜    | D-008 (rest)  |
 | M12 | Death & revive                           | B     | ⬜     | ⬜    | —             |
@@ -508,7 +508,27 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 
 <!-- Newest entries on top -->
 
-### 2026-06-21 — M8 Skills as class-gated abilities (complete)
+### 2026-06-21 — M9 Monster / enemy system (complete)
+
+- **Did:** added the pure-domain `src/domain/monsters/` module TDD-first (imports `combat` +
+  `stats` only; nothing inner imports it). `monster-def.ts` (`MonsterDef`/`MonsterStatBlock`
+  data rows), `monster-bases.ts` (`MONSTER_BASES` = weak `goblin-grunt`, strong `orc-brute`,
+  boss-flavoured `ogre-warlord`; `monsterById` throws on unknown), `scale-monster.ts`
+  (`Monster implements Combatant` like `TrainingDummy`; `scaleMonster(def, level,
+allowedElements, {statMultiplier})` = `floor((base + perLevel·(L−1))·mult)`, deterministic, no
+  rng). Element resolves to the monster's `preferredElement` **if** the act's `allowedElements`
+  permits it, else `physical`; `flatDamage` is routed into `ELEMENT_DAMAGE_STAT[element]`, so the
+  same `ogre-warlord` deals physical in act 1 and fire in act 2. `scaleBoss` =
+  `BOSS_STAT_MULTIPLIER` (3×) applied before the floor. Confirmed with design: two normals + one
+  boss archetype; linear per-monster gains; deterministic (variance → D-021); element via
+  `allowedElements`. **232 tests green (+12); lint + build pass.** Headline test: the scaled
+  monster works as a `resolveAttack` attacker/defender and boss stats = normal × 3.
+- **Tracker change:** M9 ⬜→✅ (Status + Tests); steps 9.1–9.2 ticked. Plan:
+  `docs/milestone-9-monsters-plan.md`.
+- **Deferrals:** D-021 (monster stat variance) appended; D-009 resolved.
+- **Next action:** start **M10 — Battle engine (1D auto-battler)**: author
+  `docs/milestone-10-*.md`; `battlefield.ts` (1D positions, front-most targeting, movement toward
+  range) then `battle.ts` (`tick(deltaMs)` driving cooldowns/attack timers via M6/M8, `Clock`+`Rng`).
 
 - **Did:** added the pure-domain `src/domain/skills/` module TDD-first (sits above
   combat + character + effects; nothing inner imports it). `skill-def.ts` merges combat data
