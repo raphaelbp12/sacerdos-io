@@ -22,28 +22,30 @@
 
 ## Index
 
-| ID    | Title                                  | Deferred in | Status   | Revisit trigger (short)                              |
-| ----- | -------------------------------------- | ----------- | -------- | ---------------------------------------------------- |
-| D-001 | Affix system (prefixes/suffixes)       | M5          | Deferred | After combat makes loot quality matter               |
-| D-002 | Modifier value _ranges_ (min–max)      | M5          | Deferred | Alongside the affix system                           |
-| D-003 | Multiple modifiers per item            | M5          | Deferred | With affixes; count scales with rarity               |
-| D-004 | Named / unique items & crafting        | M5          | Deferred | After affixes; needs a baseline of item depth        |
-| D-005 | Drop tables / loot sources             | M5          | Deferred | When combat/enemies exist to drop loot               |
-| D-006 | Consumable generation                  | M5          | Deferred | When consumables need variety beyond seed set        |
-| D-007 | Persistence (save / load)              | M5          | Deferred | When losing state between sessions becomes painful   |
-| D-008 | XP / leveling system                   | pre-M6      | Deferred | When the player needs to _earn_ higher itemLevel     |
-| D-009 | Enemy / monster system                 | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                 |
-| D-010 | Stat cache / memoization               | M1          | Deferred | Only if profiling shows getStat() is a hotspot       |
-| D-011 | Skills as class-gated buffs            | M3          | Resolved | Built in M8 (`src/domain/skills/`)                   |
-| D-012 | Advanced on-hit effects                | M6          | Deferred | When gear/skills need regen, leech, per-hit effects  |
-| D-013 | Additional classes beyond Knight       | M7          | Deferred | When a second class / class-select UI is wanted      |
-| D-014 | Enemy skill-casting                    | M8          | Deferred | When monsters need fireball / cold-bolt abilities    |
-| D-015 | Concrete skill ranges ("tune live")    | M8          | Deferred | When the battle has positions (M10) to tune against  |
-| D-020 | Respec cost / cooldown                 | M7          | Deferred | If free refunds make builds feel weightless          |
-| D-021 | Monster stat variance (rng roll)       | M9          | Deferred | When fights feel too uniform / need per-spawn spread |
-| D-016 | Battle visuals / formation UI / juice  | M10         | Deferred | When the battle needs a real-time view & polish      |
-| D-022 | Per-unit / stat-driven movement speed  | M10         | Deferred | When unit speed should differ (ranged kiting, haste) |
-| D-023 | Buff / debuff skills applied in-battle | M10         | Deferred | When combatants can carry dynamic modifier sources   |
+| ID    | Title                                  | Deferred in | Status   | Revisit trigger (short)                                  |
+| ----- | -------------------------------------- | ----------- | -------- | -------------------------------------------------------- |
+| D-001 | Affix system (prefixes/suffixes)       | M5          | Deferred | After combat makes loot quality matter                   |
+| D-002 | Modifier value _ranges_ (min–max)      | M5          | Deferred | Alongside the affix system                               |
+| D-003 | Multiple modifiers per item            | M5          | Deferred | With affixes; count scales with rarity                   |
+| D-004 | Named / unique items & crafting        | M5          | Deferred | After affixes; needs a baseline of item depth            |
+| D-005 | Drop tables / loot sources             | M5          | Deferred | When combat/enemies exist to drop loot                   |
+| D-006 | Consumable generation                  | M5          | Deferred | When consumables need variety beyond seed set            |
+| D-007 | Persistence (save / load)              | M5          | Deferred | When losing state between sessions becomes painful       |
+| D-008 | XP / leveling system                   | pre-M6      | Resolved | Level curve M7; kills award XP (split) M11 (D-024 tunes) |
+| D-009 | Enemy / monster system                 | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                     |
+| D-010 | Stat cache / memoization               | M1          | Deferred | Only if profiling shows getStat() is a hotspot           |
+| D-011 | Skills as class-gated buffs            | M3          | Resolved | Built in M8 (`src/domain/skills/`)                       |
+| D-012 | Advanced on-hit effects                | M6          | Deferred | When gear/skills need regen, leech, per-hit effects      |
+| D-013 | Additional classes beyond Knight       | M7          | Deferred | When a second class / class-select UI is wanted          |
+| D-014 | Enemy skill-casting                    | M8          | Deferred | When monsters need fireball / cold-bolt abilities        |
+| D-015 | Concrete skill ranges ("tune live")    | M8          | Deferred | When the battle has positions (M10) to tune against      |
+| D-020 | Respec cost / cooldown                 | M7          | Deferred | If free refunds make builds feel weightless              |
+| D-021 | Monster stat variance (rng roll)       | M9          | Deferred | When fights feel too uniform / need per-spawn spread     |
+| D-016 | Battle visuals / formation UI / juice  | M10         | Deferred | When the battle needs a real-time view & polish          |
+| D-022 | Per-unit / stat-driven movement speed  | M10         | Deferred | When unit speed should differ (ranged kiting, haste)     |
+| D-023 | Buff / debuff skills applied in-battle | M10         | Deferred | When combatants can carry dynamic modifier sources       |
+| D-024 | XP → level curve balancing             | M11         | Deferred | When leveling pace needs tuning against content          |
+| D-025 | Per-difficulty extra elements          | M11         | Deferred | When hard should add elements (e.g. act 2 → cold)        |
 
 ---
 
@@ -260,6 +262,29 @@
   wrapper) so timed/charge effects can alter stats during the fight.
 - **Related:** `castSkills` in [src/domain/battle/battle.ts](../src/domain/battle/battle.ts);
   `resolveBuff`/`resolveDebuff` in [src/domain/skills/resolve-skill.ts](../src/domain/skills/resolve-skill.ts).
+
+### D-024 — XP → level curve balancing
+
+- **What:** The real experience curve that converts accumulated XP into character levels
+  (per-level thresholds, pacing against the stage XP baselines and group sizes).
+- **Why deferred (M11):** M11 ships `xpForKill` + `splitXpAmongLiving` (the actual deliverable —
+  kills award XP split among the living) plus a **placeholder triangular** `xpRequiredForLevel`
+  (`100 × (L−1) × L / 2`) so XP is usable. The numbers are not balanced against content yet.
+- **Revisit trigger:** When leveling pace feels wrong against the 2-act content, or when an XP /
+  level bar surfaces in the UI and the curve needs to feel right.
+- **Related:** `xpRequiredForLevel` / `levelForTotalXp` in [src/domain/stages/xp.ts](../src/domain/stages/xp.ts).
+
+### D-025 — Per-difficulty extra elements
+
+- **What:** Letting a **difficulty** add damage elements on top of the act's set (overview hint:
+  hard act 2 could deal physical + fire + **cold**).
+- **Why deferred (M11):** the overview's v1 rule is _"for now, the only loot difference between
+  difficulties is the item level."_ M11 sources elements purely from the act (`allowedElements`)
+  and makes difficulty a flat item/monster-level bonus only, keeping act 1 strictly physical.
+- **Revisit trigger:** When difficulties should feel mechanically distinct beyond item level —
+  e.g. hard introducing a new element the player must resist.
+- **Related:** `allowedElements` in [src/domain/stages/act-def.ts](../src/domain/stages/act-def.ts);
+  `DifficultyDef` in [src/domain/stages/difficulty.ts](../src/domain/stages/difficulty.ts).
 
 ---
 

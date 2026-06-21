@@ -48,8 +48,8 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M10 — Battle engine (1D auto-battler)** (done). Next up: ⬜ **M11 —
-Stages, acts, difficulties, boss keys**.
+**Current focus:** ✅ **M11 — Stages, acts, difficulties, boss keys** (done). Next up: ⬜ **M12 —
+Death & revive**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -63,7 +63,7 @@ Stages, acts, difficulties, boss keys**.
 | M8  | Skills as class-gated abilities          | A     | ✅     | ✅    | D-011         |
 | M9  | Monster / enemy system                   | B     | ✅     | ✅    | D-009         |
 | M10 | Battle engine (1D auto-battler)          | B     | ✅     | ✅    | —             |
-| M11 | Stages, acts, difficulties, boss keys    | B     | ⬜     | ⬜    | D-008 (rest)  |
+| M11 | Stages, acts, difficulties, boss keys    | B     | ✅     | ✅    | D-008 (rest)  |
 | M12 | Death & revive                           | B     | ⬜     | ⬜    | —             |
 | M13 | Economy & gold                           | C     | ⬜     | ⬜    | —             |
 | M14 | Drop tables & chests                     | C     | ⬜     | ⬜    | D-005         |
@@ -507,6 +507,31 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-21 — M11 Stages, acts, difficulties, boss keys (complete)
+
+- **Did:** added the pure-domain `src/domain/stages/` module TDD-first (imports `monsters` +
+  `combat` only; nothing inner imports it). `difficulty.ts` (`normal`/`hard`; hard locked,
+  `+10` item & monster level — elements stay act-sourced, D-025). `stage-def.ts` (`StageDef`
+  `waveSizes`/`monsterId`/`bossId`/`monsterLevel`/`itemLevel`/rewards + `ActBossDef`).
+  `act-def.ts` (`buildAct` expands a compact `ActTuning` into 9 ramped stages; `ACTS` = act 1
+  physical, act 2 +fire; `actByIndex`/`stageAt` throw out of range). `build-waves.ts`
+  (`buildStageWaves` = regular waves + a final `scaleBoss` stage-boss wave; `buildActBossWaves`;
+  `stageItemLevel`/`stageMonsterLevel` = base + difficulty bonus) — **this is the seam that
+  produces the `Monster[][]` the M10 `StageRunner` already consumes**. `progression.ts`
+  (`advance`/`retreat` clamped to `[act1 s1, lastAct s9]`, act-chaining; `isFinalStage`;
+  `isDifficultyUnlocked`). `boss-key.ts` (`BossKey{actIndex}`; `settleBossKeyAfterFight` consumes
+  one key iff the boss dropped loot). `xp.ts` (`xpForKill` per-source; `splitXpAmongLiving` =
+  equal floor share to the living, **0 to the dead**; placeholder triangular `levelForTotalXp`).
+  Headline tests green: act 1 physical / act-2 stage boss fire; hard raises item+monster level;
+  fixed monster count per stage; clear advances / wipe retreats (floor at 1-1); hard locked until
+  normal final boss; dead member earns no XP. **294 tests green (+37); lint + build pass.**
+- **Tracker change:** M11 ⬜→✅ (Status + Tests); steps 11.1–11.7 ticked. Plan:
+  `docs/milestone-11-stages-plan.md`. Delivered the rest of D-008 (kills award XP).
+- **Deferrals:** D-024 (XP→level curve balancing), D-025 (per-difficulty extra elements) appended.
+- **Next action:** start **M12 — Death & revive**: author `docs/milestone-12-*.md`; `respawn.ts`
+  (2-min `Clock`-driven timer, flat+% reducible), revive-all at stage start, placeholder paid
+  instant-revive cost (D-017).
 
 ### 2026-06-21 — M10 Battle engine (1D auto-battler) (complete)
 
