@@ -48,7 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M13 — Economy & gold** (done). Next up: ⬜ **M14 — Drop tables & chests**.
+**Current focus:** ✅ **M14 — Drop tables & chests** (done). Next up: ⬜ **M15 — Inventory & stash capacity**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -65,7 +65,7 @@ Do this, in order:
 | M11 | Stages, acts, difficulties, boss keys    | B     | ✅     | ✅    | D-008 (rest)  |
 | M12 | Death & revive                           | B     | ✅     | ✅    | D-017 (sets)  |
 | M13 | Economy & gold                           | C     | ✅     | ✅    | —             |
-| M14 | Drop tables & chests                     | C     | ⬜     | ⬜    | D-005         |
+| M14 | Drop tables & chests                     | C     | ✅     | ✅    | D-005         |
 | M15 | Inventory & stash capacity               | C     | ⬜     | ⬜    | —             |
 | M16 | Item modifiers / gems                    | D     | ⬜     | ⬜    | D-001/002/003 |
 | M17 | Cube system                              | D     | ⬜     | ⬜    | —             |
@@ -506,6 +506,32 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-21 — M14 Drop tables & chests (complete)
+
+- **Did:** added the pure-domain `src/domain/loot/` module TDD-first (imports `items` + `rng`;
+  nothing inner imports it). Refactored `generate-item.ts` to take **optional** `base`/`rarity`
+  in `GenerateOptions` (forced base/rarity bypass the internal rolls; with neither, rng call
+  order is byte-for-byte identical — snapshot + all existing tests unchanged). `drop-table.ts`
+  (`ItemCategory` = weapon/armor/accessory via `categoryForSlot`; `DropTable` data =
+  `rarityWeights` + `categoryWeights`; generic `weightedPick` banding like `rollRarity`;
+  `rollDrop` = roll rarity → category → pick eligible base → `generateItem(forced)`). `chest-def.ts`
+  (`ChestTier` common/rare/legendary; `Chest {tier, guaranteedBaseId?}`; `COMMON_CHEST_TABLE`
+  carries the overview's first-chest grade odds 78/20.6/1.37; `firstChest(weaponBaseId)` →
+  guaranteed-class-weapon chest; `openChest` forces base@Common when guaranteed, else rolls tier
+  table). `chest-inventory.ts` (`LootSink` contract — decoupled from M15's capped `Inventory`;
+  `ChestInventory` capacity-capped: `add` returns false when full, `open` throws when sink full /
+  index OOR, else routes item to sink + removes chest). Headline tests green: 100k-roll grade
+  odds within tolerance; first drop always the class weapon; full store rejects chests; open
+  blocked when sink full. **352 tests green (+26); lint + build pass.**
+- **Tracker change:** M14 ⬜→✅ (Status + Tests); steps 14.0–14.2 ticked. Plan:
+  `docs/milestone-14-drops-plan.md`. Resolved D-005.
+- **Deferrals:** none new. D-005 tuning notes (per-source chest drop chances, first-chest 16%
+  gate, rare/legendary grade odds) folded under existing D-026 / rune drop-rate work (M18).
+- **Next action:** start **M15 — Inventory & stash capacity**: author `docs/milestone-15-*.md`;
+  generalize `Inventory` with capacity + stacking policy (misc stacks; modifiers / boss keys do
+  not), then `stash.ts` multi-tab over the same abstraction; wire `Inventory` to satisfy the
+  `LootSink` contract introduced in M14.
 
 ### 2026-06-21 — M13 Economy & gold (complete)
 

@@ -28,7 +28,7 @@
 | D-002 | Modifier value _ranges_ (min–max)      | M5          | Deferred | Alongside the affix system                               |
 | D-003 | Multiple modifiers per item            | M5          | Deferred | With affixes; count scales with rarity                   |
 | D-004 | Named / unique items & crafting        | M5          | Deferred | After affixes; needs a baseline of item depth            |
-| D-005 | Drop tables / loot sources             | M5          | Deferred | When combat/enemies exist to drop loot                   |
+| D-005 | Drop tables / loot sources             | M5          | Resolved | Resolved in M14 (drop tables + chests)                   |
 | D-006 | Consumable generation                  | M5          | Deferred | When consumables need variety beyond seed set            |
 | D-007 | Persistence (save / load)              | M5          | Deferred | When losing state between sessions becomes painful       |
 | D-008 | XP / leveling system                   | pre-M6      | Resolved | Level curve M7; kills award XP (split) M11 (D-024 tunes) |
@@ -96,6 +96,12 @@
 - **Why deferred (M5):** There is no source of drops yet (no enemies, no encounters). A drop
   table with nothing to drop from is empty scaffolding.
 - **Revisit trigger:** When the combat/enemy system (M6+) can _award_ loot on victory.
+- **Resolved (M14):** `src/domain/loot/` adds data-driven `DropTable`s (weighted rarity "grade
+  odds" + item category) rolled via `Rng` and routed through `generateItem`; `Chest`/`openChest`
+  with a guaranteed 100% first-drop class weapon; capacity-capped `ChestInventory`. The remaining
+  **tuning** — per-source chest drop chances (monster→common, stage-boss→rare, act-boss→legendary;
+  first-chest 16% gate) and rare/legendary grade odds — are placeholders tied to stage spread +
+  rune drop-rate buffs (M18), tracked under D-026.
 
 ### D-006 — Consumable generation
 

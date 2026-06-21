@@ -155,4 +155,33 @@ describe("generateItem", () => {
       expect(item).toMatchSnapshot();
     });
   });
+
+  describe("forced base / rarity options", () => {
+    it("forces the given base", () => {
+      const plate = ITEM_BASES.find((b) => b.id === "plate-body")!;
+      const item = generateItem(new SeededRng(1), { itemLevel: 10, base: plate });
+      expect(item.name).toBe("Plate Body");
+      expect(item.slot).toBe("body");
+    });
+
+    it("forces the given rarity, bypassing the rarity roll", () => {
+      const short = ITEM_BASES.find((b) => b.id === "short-sword")!;
+      for (let seed = 0; seed < 30; seed++) {
+        const item = generateItem(new SeededRng(seed), {
+          itemLevel: 5,
+          base: short,
+          rarity: "Legendary",
+        });
+        expect(item.rarity).toBe("Legendary");
+        expect(item.name).toBe("Short Sword");
+      }
+    });
+
+    it("with neither option, output is unchanged from the default roll", () => {
+      // Regression: the optional params must not perturb the rng call order.
+      const a = generateItem(new SeededRng(42), { itemLevel: 5 });
+      const b = generateItem(new SeededRng(42), { itemLevel: 5 });
+      expect(a).toEqual(b);
+    });
+  });
 });

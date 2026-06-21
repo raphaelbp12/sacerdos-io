@@ -1,5 +1,7 @@
 import type { Rng } from "../rng/rng";
 import type { Item } from "./item";
+import type { ItemBase } from "./item-base";
+import type { Rarity } from "./rarity";
 import { ITEM_BASES } from "./item-bases";
 import { rollRarity } from "./roll-rarity";
 import { baseValueForLevel } from "./level-curve";
@@ -7,6 +9,10 @@ import { scaleItem } from "./scale-item";
 
 export interface GenerateOptions {
   readonly itemLevel: number;
+  /** Force a specific base archetype, bypassing the eligibility roll. */
+  readonly base?: ItemBase;
+  /** Force a specific rarity, bypassing the rarity roll. */
+  readonly rarity?: Rarity;
 }
 
 /**
@@ -28,14 +34,11 @@ export interface GenerateOptions {
 export function generateItem(rng: Rng, opts: GenerateOptions): Item {
   const { itemLevel } = opts;
 
-  // 1. Eligible bases
-  const eligible = ITEM_BASES.filter((b) => b.minLevel <= itemLevel);
+  // 1 & 2. Base: use the forced base, else pick one uniformly from eligible bases.
+  const base = opts.base ?? pickEligibleBase(rng, itemLevel);
 
-  // 2. Pick base uniformly
-  const base = eligible[rng.nextInt(0, eligible.length - 1)];
-
-  // 3. Roll rarity
-  const rarity = rollRarity(rng);
+  // 3. Rarity: use the forced rarity, else roll one.
+  const rarity = opts.rarity ?? rollRarity(rng);
 
   // 4. Roll one modifier attribute
   const attribute =
@@ -58,4 +61,10 @@ export function generateItem(rng: Rng, opts: GenerateOptions): Item {
 
   // 8. Apply rarity scaling
   return scaleItem(item);
+}
+
+/** Picks one ITEM_BASES row uniformly among those eligible for the given item level. */
+function pickEligibleBase(rng: Rng, itemLevel: number): ItemBase {
+  const eligible = ITEM_BASES.filter((b) => b.minLevel <= itemLevel);
+  return eligible[rng.nextInt(0, eligible.length - 1)];
 }
