@@ -7,7 +7,7 @@ exports[`generateItem > headline acceptance test > seed 42 itemLevel 5: determin
   "levelReq": 1,
   "modifiers": [
     {
-      "attribute": "AGI",
+      "attribute": "armor",
       "kind": "flat",
       "value": 17,
     },

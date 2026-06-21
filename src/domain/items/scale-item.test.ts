@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { scaleItem } from "./scale-item";
 import type { Item } from "./item";
 
-/** Base item template with a flat AGI modifier of value 5. */
+/** Base item template with a flat attack modifier of value 5. */
 const BASE_ITEM: Item = {
   id: "agi-boots",
   name: "Boots of Agility",
@@ -10,7 +10,7 @@ const BASE_ITEM: Item = {
   kind: "equippable",
   levelReq: 1,
   slot: "boots",
-  modifiers: [{ attribute: "AGI", kind: "flat", value: 5 }],
+  modifiers: [{ attribute: "attack", kind: "flat", value: 5 }],
 };
 
 describe("scaleItem — Milestone 4 acceptance", () => {
@@ -29,7 +29,7 @@ describe("scaleItem — Milestone 4 acceptance", () => {
     expect(item.modifiers[0].value).toBe(25);
   });
 
-  it("same base item at Common vs Rare yields different AGI bonus", () => {
+  it("same base item at Common vs Rare yields different attack bonus", () => {
     const common = scaleItem({ ...BASE_ITEM, rarity: "Common" });
     const rare = scaleItem({ ...BASE_ITEM, rarity: "Rare" });
     expect(rare.modifiers[0].value).toBeGreaterThan(common.modifiers[0].value);
@@ -39,7 +39,7 @@ describe("scaleItem — Milestone 4 acceptance", () => {
     const item: Item = {
       ...BASE_ITEM,
       rarity: "Uncommon",
-      modifiers: [{ attribute: "MP", kind: "percentage", value: 0.1 }],
+      modifiers: [{ attribute: "hp", kind: "percentage", value: 0.1 }],
     };
     const scaled = scaleItem(item);
     expect(scaled.modifiers[0].value).toBeCloseTo(0.2); // 0.1 × 2
@@ -50,8 +50,8 @@ describe("scaleItem — Milestone 4 acceptance", () => {
       ...BASE_ITEM,
       rarity: "Epic",
       modifiers: [
-        { attribute: "STR", kind: "flat", value: 3 },
-        { attribute: "AGI", kind: "flat", value: 2 },
+        { attribute: "armor", kind: "flat", value: 3 },
+        { attribute: "attack", kind: "flat", value: 2 },
       ],
     };
     const scaled = scaleItem(item);

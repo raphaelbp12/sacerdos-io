@@ -1,6 +1,6 @@
 import { useState, useReducer } from "react";
 import "./App.css";
-import { Character, ATTRIBUTES } from "./domain/stats";
+import { Character, STATS } from "./domain/stats";
 import {
   Equipment,
   Inventory,
@@ -10,7 +10,15 @@ import {
   generateItem,
 } from "./domain/items";
 import { SeededRng } from "./domain/rng";
-import type { Attribute } from "./domain/stats";
+import {
+  asCombatant,
+  TrainingDummy,
+  resolveAttack,
+  timeBetweenAttacks,
+  physicalResist,
+  hitDamageFromStats,
+} from "./domain/combat";
+import type { Stat } from "./domain/stats";
 import type { EquipmentSlot, Item } from "./domain/items";
 
 // Created at module load time (once per app session).
@@ -20,12 +28,11 @@ const appRng = new SeededRng(Date.now());
 
 const CHARACTER_LEVEL = 5;
 
-const BASE_STATS: Record<Attribute, number> = {
-  HP: 100,
-  MP: 80,
-  STR: 10,
-  AGI: 10,
-  INT: 10,
+const BASE_STATS: Partial<Record<Stat, number>> = {
+  hp: 100,
+  attack: 10,
+  physicalDamage: 5,
+  armor: 10,
 };
 
 const RARITY_CLASS: Record<string, string> = {
@@ -69,6 +76,10 @@ function App() {
   const [character] = useState(
     () => new Character(BASE_STATS, [equipment], CHARACTER_LEVEL),
   );
+  const [dummy] = useState(
+    () => new TrainingDummy("Training Dummy", { hp: 200, armor: 20 }),
+  );
+  const [combatLog, setCombatLog] = useState<string[]>([]);
 
   const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
@@ -102,6 +113,23 @@ function App() {
     forceUpdate();
   }
 
+  function handleAttackDummy() {
+    const result = resolveAttack(asCombatant(character, "Hero"), dummy, appRng);
+    const message = result.dodged
+      ? `${dummy.name} dodged the attack!`
+      : result.blocked
+        ? `${dummy.name} blocked the attack!`
+        : `Hit ${dummy.name} for ${result.damage} damage` +
+          (result.defeated ? " — defeated!" : ".");
+    setCombatLog((prev) => [message, ...prev].slice(0, 8));
+  }
+
+  function handleResetDummy() {
+    dummy.reset();
+    setCombatLog([]);
+    forceUpdate();
+  }
+
   const activeBuffs = character.getActiveBuffs();
 
   return (
@@ -113,18 +141,64 @@ function App() {
         <h2 className="panel-heading">Stats</h2>
         <table className="stats-table">
           <tbody>
-            {ATTRIBUTES.map((attr) => (
-              <tr key={attr}>
-                <th>{attr}</th>
+            {STATS.map((stat) => (
+              <tr key={stat}>
+                <th>{stat}</th>
                 <td>
-                  {attr === "HP"
-                    ? `${character.currentHP} / ${character.getStat("HP")}`
-                    : character.getStat(attr)}
+                  {stat === "hp"
+                    ? `${character.currentHP} / ${character.getStat("hp")}`
+                    : character.getStat(stat)}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </section>
+
+      <section className="panel">
+        <h2 className="panel-heading">Combat</h2>
+        <table className="stats-table">
+          <tbody>
+            <tr>
+              <th>Hit damage</th>
+              <td>{hitDamageFromStats((s) => character.getStat(s))}</td>
+            </tr>
+            <tr>
+              <th>Attack interval</th>
+              <td>{timeBetweenAttacks(character.getStat("attackSpeed"))} ms</td>
+            </tr>
+            <tr>
+              <th>Physical resist</th>
+              <td>
+                {Math.round(physicalResist(character.getStat("armor")) * 100)}%
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p className="dummy-hp">
+          {dummy.name}: {dummy.currentHP} / {dummy.getStat("hp")} HP
+        </p>
+        <div className="combat-actions">
+          <button
+            className="next-turn-btn"
+            onClick={handleAttackDummy}
+            disabled={dummy.currentHP <= 0}
+          >
+            Attack Dummy
+          </button>
+          <button className="next-turn-btn" onClick={handleResetDummy}>
+            Reset Dummy
+          </button>
+        </div>
+
+        {combatLog.length > 0 && (
+          <ul className="combat-log">
+            {combatLog.map((line, i) => (
+              <li key={`${combatLog.length - i}-${line}`}>{line}</li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {activeBuffs.length > 0 && (

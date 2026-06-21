@@ -4,7 +4,7 @@ import { EQUIPMENT_SLOTS } from "./equipment-slot";
 import type { Item } from "./item";
 import { Character } from "../stats/character";
 
-const BASE_STATS = { HP: 100, MP: 50, STR: 8, AGI: 10, INT: 6 };
+const BASE_STATS = { hp: 100, armor: 8, attack: 10 };
 
 const BOOTS_OF_AGILITY: Item = {
   id: "boots-of-agility",
@@ -13,7 +13,7 @@ const BOOTS_OF_AGILITY: Item = {
   kind: "equippable",
   levelReq: 1,
   slot: "boots",
-  modifiers: [{ attribute: "AGI", kind: "flat", value: 5 }],
+  modifiers: [{ attribute: "attack", kind: "flat", value: 5 }],
 };
 
 const SWIFT_BOOTS: Item = {
@@ -23,7 +23,7 @@ const SWIFT_BOOTS: Item = {
   kind: "equippable",
   levelReq: 1,
   slot: "boots",
-  modifiers: [{ attribute: "AGI", kind: "flat", value: 8 }],
+  modifiers: [{ attribute: "attack", kind: "flat", value: 8 }],
 };
 
 const HEALTH_POTION: Item = {
@@ -59,7 +59,7 @@ describe("Equipment.equip / unequip", () => {
     const equipment = new Equipment();
     equipment.equip(BOOTS_OF_AGILITY, 1);
     expect(equipment.getModifiers()).toContainEqual({
-      attribute: "AGI",
+      attribute: "attack",
       kind: "flat",
       value: 5,
     });
@@ -123,28 +123,28 @@ describe("Equipment.equip / unequip", () => {
 });
 
 describe("Equipment + Character integration (Milestone 2 acceptance tests)", () => {
-  it("equip Boots of Agility (+5 AGI) → character AGI becomes 15", () => {
+  it("equip Boots of Agility (+5 attack) → character attack becomes 15", () => {
     const equipment = new Equipment();
     const character = new Character(BASE_STATS, [equipment]);
     equipment.equip(BOOTS_OF_AGILITY, 1);
-    expect(character.getStat("AGI")).toBe(15);
+    expect(character.getStat("attack")).toBe(15);
   });
 
-  it("unequip Boots of Agility → character AGI returns to 10", () => {
+  it("unequip Boots of Agility → character attack returns to 10", () => {
     const equipment = new Equipment();
     const character = new Character(BASE_STATS, [equipment]);
     equipment.equip(BOOTS_OF_AGILITY, 1);
-    expect(character.getStat("AGI")).toBe(15);
+    expect(character.getStat("attack")).toBe(15);
     equipment.unequip("boots");
-    expect(character.getStat("AGI")).toBe(10);
+    expect(character.getStat("attack")).toBe(10);
   });
 
   it("equipping into an occupied slot swaps item and recomputes stats", () => {
     const equipment = new Equipment();
     const character = new Character(BASE_STATS, [equipment]);
     equipment.equip(BOOTS_OF_AGILITY, 1);
-    expect(character.getStat("AGI")).toBe(15);
+    expect(character.getStat("attack")).toBe(15);
     equipment.equip(SWIFT_BOOTS, 1);
-    expect(character.getStat("AGI")).toBe(18);
+    expect(character.getStat("attack")).toBe(18);
   });
 });

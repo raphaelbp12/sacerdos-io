@@ -22,19 +22,20 @@
 
 ## Index
 
-| ID    | Title                             | Deferred in | Status   | Revisit trigger (short)                            |
-| ----- | --------------------------------- | ----------- | -------- | -------------------------------------------------- |
-| D-001 | Affix system (prefixes/suffixes)  | M5          | Deferred | After combat makes loot quality matter             |
-| D-002 | Modifier value _ranges_ (min–max) | M5          | Deferred | Alongside the affix system                         |
-| D-003 | Multiple modifiers per item       | M5          | Deferred | With affixes; count scales with rarity             |
-| D-004 | Named / unique items & crafting   | M5          | Deferred | After affixes; needs a baseline of item depth      |
-| D-005 | Drop tables / loot sources        | M5          | Deferred | When combat/enemies exist to drop loot             |
-| D-006 | Consumable generation             | M5          | Deferred | When consumables need variety beyond seed set      |
-| D-007 | Persistence (save / load)         | M5          | Deferred | When losing state between sessions becomes painful |
-| D-008 | XP / leveling system              | pre-M6      | Deferred | When the player needs to _earn_ higher itemLevel   |
-| D-009 | Enemy / monster system            | pre-M6      | Deferred | Folded into M6 as a minimal "training dummy"       |
-| D-010 | Stat cache / memoization          | M1          | Deferred | Only if profiling shows getStat() is a hotspot     |
-| D-011 | Skills as class-gated buffs       | M3          | Deferred | When a class system or skill UI is wanted          |
+| ID    | Title                             | Deferred in | Status   | Revisit trigger (short)                             |
+| ----- | --------------------------------- | ----------- | -------- | --------------------------------------------------- |
+| D-001 | Affix system (prefixes/suffixes)  | M5          | Deferred | After combat makes loot quality matter              |
+| D-002 | Modifier value _ranges_ (min–max) | M5          | Deferred | Alongside the affix system                          |
+| D-003 | Multiple modifiers per item       | M5          | Deferred | With affixes; count scales with rarity              |
+| D-004 | Named / unique items & crafting   | M5          | Deferred | After affixes; needs a baseline of item depth       |
+| D-005 | Drop tables / loot sources        | M5          | Deferred | When combat/enemies exist to drop loot              |
+| D-006 | Consumable generation             | M5          | Deferred | When consumables need variety beyond seed set       |
+| D-007 | Persistence (save / load)         | M5          | Deferred | When losing state between sessions becomes painful  |
+| D-008 | XP / leveling system              | pre-M6      | Deferred | When the player needs to _earn_ higher itemLevel    |
+| D-009 | Enemy / monster system            | pre-M6      | Deferred | Folded into M6 as a minimal "training dummy"        |
+| D-010 | Stat cache / memoization          | M1          | Deferred | Only if profiling shows getStat() is a hotspot      |
+| D-011 | Skills as class-gated buffs       | M3          | Deferred | When a class system or skill UI is wanted           |
+| D-012 | Advanced on-hit effects           | M6          | Deferred | When gear/skills need regen, leech, per-hit effects |
 
 ---
 
@@ -137,6 +138,17 @@
 - **Why deferred (M3):** No class system or skill UI yet; the buff machinery exists but is
   only triggered by consumables.
 - **Revisit trigger:** When a class system or an active-skill UI is desired.
+
+### D-012 — Advanced on-hit effects (regen, leech, per-hit/kill)
+
+- **What:** Effects that fire _during_ combat beyond a flat hit: HP/second regeneration, life
+  leech (% of damage dealt returned as HP), and "per hit" / "per kill" triggers (e.g. +HP on
+  kill) seen in [material-effects.md](material-effects.md).
+- **Why deferred (M6):** M6 resolves a single physical hit (damage formula + defense order)
+  through a `Combatant` contract. On-hit/over-time effects need a battle tick (M10) and a
+  richer effect-trigger system to be meaningful; adding them now would be untested machinery.
+- **Revisit trigger:** When the battle engine (M10) ticks combat over time and item modifiers
+  (M16) introduce leech/regen affixes.
 
 ---
 

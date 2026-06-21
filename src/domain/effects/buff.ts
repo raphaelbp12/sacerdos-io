@@ -15,9 +15,11 @@ export interface BuffDef {
 
 /** Internal runtime state for a single active buff. */
 class ActiveBuff {
+  declare readonly def: BuffDef;
   declare remaining: number;
 
-  constructor(readonly def: BuffDef) {
+  constructor(def: BuffDef) {
+    this.def = def;
     this.remaining = def.duration;
   }
 

@@ -1,4 +1,4 @@
-import type { Attribute } from "../stats/attribute";
+import type { Stat } from "../stats/stat";
 
 /**
  * A one-shot effect applied instantly when an item is used.
@@ -6,7 +6,7 @@ import type { Attribute } from "../stats/attribute";
  */
 export interface InstantEffectDef {
   readonly type: "heal";
-  /** The attribute targeted by the effect (e.g. 'HP' for a healing potion). */
-  readonly attribute: Attribute;
+  /** The stat targeted by the effect (e.g. 'hp' for a healing potion). */
+  readonly attribute: Stat;
   readonly amount: number;
 }

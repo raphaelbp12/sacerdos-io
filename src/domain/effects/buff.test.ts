@@ -6,14 +6,14 @@ const AGI_BUFF: BuffDef = {
   id: "agi-boost",
   name: "Agility Boost",
   duration: 3,
-  modifiers: [{ attribute: "AGI", kind: "flat", value: 5 }],
+  modifiers: [{ attribute: "attack", kind: "flat", value: 5 }],
 };
 
 const STR_BUFF: BuffDef = {
   id: "str-boost",
   name: "Strength Boost",
   duration: 5,
-  modifiers: [{ attribute: "STR", kind: "flat", value: 3 }],
+  modifiers: [{ attribute: "armor", kind: "flat", value: 3 }],
 };
 
 describe("BuffTracker", () => {
@@ -76,7 +76,7 @@ describe("BuffTracker", () => {
     t.advance(3); // AGI expires, STR still has 2 left
     const mods = t.getModifiers();
     expect(mods).toHaveLength(1);
-    expect(mods[0].attribute).toBe("STR");
+    expect(mods[0].attribute).toBe("armor");
   });
 
   it("getActiveBuffs returns metadata for each active buff", () => {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { ITEM_BASES } from "./item-bases";
 import { EQUIPMENT_SLOTS } from "./equipment-slot";
-import { ATTRIBUTES } from "../stats/attribute";
+import { STATS } from "../stats/stat";
 
 describe("ITEM_BASES database invariants", () => {
   it("every slot is a valid EquipmentSlot", () => {
@@ -10,10 +10,10 @@ describe("ITEM_BASES database invariants", () => {
     }
   });
 
-  it("every rollableAttributes entry is a valid Attribute", () => {
+  it("every rollableAttributes entry is a valid Stat", () => {
     for (const base of ITEM_BASES) {
       for (const attr of base.rollableAttributes) {
-        expect(ATTRIBUTES).toContain(attr);
+        expect(STATS).toContain(attr);
       }
     }
   });

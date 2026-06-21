@@ -48,8 +48,8 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ⬜ **M6 — Canonical stats + damage + defense** (not started). _Confirm §5
-open questions 1–3 before starting._
+**Current focus:** ✅ **M6 — Canonical stats + damage + defense** (done). Next up: ⬜ **M7
+— Class + levels + skill points + passives**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -58,7 +58,7 @@ open questions 1–3 before starting._
 | M3  | Consumables + buffs                      | core  | ✅     | ✅    | —             |
 | M4  | Rarity scaling                           | core  | ✅     | ✅    | —             |
 | M5  | Procedural item generation               | core  | ✅     | ✅    | —             |
-| M6  | Canonical stats + damage + defense       | A     | ⬜     | ⬜    | sets up D-009 |
+| M6  | Canonical stats + damage + defense       | A     | ✅     | ✅    | sets up D-009 |
 | M7  | Class + levels + skill points + passives | A     | ⬜     | ⬜    | D-008 (part)  |
 | M8  | Skills as class-gated abilities          | A     | ⬜     | ⬜    | D-011         |
 | M9  | Monster / enemy system                   | B     | ⬜     | ⬜    | D-009         |
@@ -507,6 +507,22 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-21 — M6 Canonical stats + damage + defense (complete)
+
+- **Did:** migrated the bootstrap attributes to the canonical `Stat` set + data-driven
+  `STAT_SCHEMA` (`stat.ts`), deleted `STR/AGI/INT/MP`, re-pointed all item/seed/UI data and
+  tests, regenerated the `generateItem` snapshot. Built the `combat/` subsystem TDD-first:
+  `derived.ts` (timing/resist/maxHP), `damage.ts` (`computeHitDamage`), `mitigation.ts`
+  (reduction→armor/resist→absorption→min-1 floor), `combatant.ts` (`Combatant` + `asCombatant`),
+  `training-dummy.ts`, `resolve-attack.ts` (dodge→block→mitigate, locked rng order). Added a
+  Combat panel (derived stats + Attack/Reset Dummy + log) to `App.tsx`. Fixed a pre-existing
+  `erasableSyntaxOnly` build break in `buff.ts`. **157 tests green; lint + build pass.** Headline
+  test proves a `+attack` weapon strictly increases damage dealt under a fixed seed.
+- **Tracker change:** M6 🟡→✅ (Status + Tests); steps 6.1–6.7 all ticked.
+- **Deferrals:** D-012 (advanced on-hit effects) logged; crit dropped (overview has no crit, not deferred).
+- **Next action:** start **M7 — Class + levels + skill points + passives**: author
+  `docs/milestone-7-*.md` and confirm any open questions before coding.
 
 ### 2026-06-21 — Roadmap authored (M1–M5 already shipped)
 

@@ -250,3 +250,38 @@
 .next-turn-btn:hover {
   background: var(--accent-border);
 }
+
+/* ── Combat ──────────────────────────────────────────────── */
+.dummy-hp {
+  margin: 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.combat-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.next-turn-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.combat-log {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.combat-log li {
+  padding: 4px 8px;
+  background: var(--accent-bg);
+  border-radius: 6px;
+}

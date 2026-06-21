@@ -1,6 +1,6 @@
 import type { ItemKind } from "./item";
 import type { EquipmentSlot } from "./equipment-slot";
-import type { Attribute } from "../stats/attribute";
+import type { Stat } from "../stats/stat";
 
 /**
  * An ItemBase is a level-agnostic archetype — "a sword", "leather helm", etc.
@@ -21,6 +21,6 @@ export interface ItemBase {
   readonly slot: EquipmentSlot;
   /** Earliest item level at which this base may be rolled. Minimum value: 1. */
   readonly minLevel: number;
-  /** The attributes this base can roll modifiers for. Must be non-empty. */
-  readonly rollableAttributes: readonly Attribute[];
+  /** The stats this base can roll modifiers for. Must be non-empty. */
+  readonly rollableAttributes: readonly Stat[];
 }

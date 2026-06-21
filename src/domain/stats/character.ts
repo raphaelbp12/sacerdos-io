@@ -1,4 +1,5 @@
-import type { Attribute } from "./attribute";
+import type { Stat } from "./stat";
+import { defaultStat, clampStat } from "./stat";
 import type { ModifierSource } from "./modifier";
 import { computeStat } from "./compute-stat";
 import { BuffTracker } from "../effects/buff";
@@ -15,14 +16,14 @@ import type { Item } from "../items/item";
  * - Zero React / DOM / Vite imports.
  */
 export class Character {
-  declare private readonly baseStats: Readonly<Record<Attribute, number>>;
+  declare private readonly baseStats: Readonly<Partial<Record<Stat, number>>>;
   declare private readonly sources: readonly ModifierSource[];
   declare private readonly buffs: BuffTracker;
   declare private _currentHP: number;
   declare readonly level: number;
 
   constructor(
-    baseStats: Readonly<Record<Attribute, number>>,
+    baseStats: Readonly<Partial<Record<Stat, number>>>,
     sources: readonly ModifierSource[] = [],
     level: number = 1,
     buffs?: BuffTracker,
@@ -31,19 +32,19 @@ export class Character {
     this.sources = sources;
     this.level = level;
     this.buffs = buffs ?? new BuffTracker();
-    this._currentHP = this.getStat("HP");
+    this._currentHP = this.getStat("hp");
   }
 
   get currentHP(): number {
     return this._currentHP;
   }
 
-  getStat(attribute: Attribute): number {
-    const base = this.baseStats[attribute];
+  getStat(stat: Stat): number {
+    const base = this.baseStats[stat] ?? defaultStat(stat);
     const modifiers = [...this.sources, this.buffs]
       .flatMap((s) => s.getModifiers())
-      .filter((m) => m.attribute === attribute);
-    return computeStat(base, modifiers);
+      .filter((m) => m.attribute === stat);
+    return clampStat(stat, computeStat(base, modifiers));
   }
 
   /**
@@ -65,7 +66,7 @@ export class Character {
     }
     for (const effect of item.instantEffects ?? []) {
       if (effect.type === "heal") {
-        const maxHP = this.getStat("HP");
+        const maxHP = this.getStat("hp");
         this._currentHP = Math.min(this._currentHP + effect.amount, maxHP);
       }
     }

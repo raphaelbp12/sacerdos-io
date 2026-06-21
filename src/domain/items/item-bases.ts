@@ -7,7 +7,7 @@ import type { ItemBase } from "./item-base";
  * - One row per gear archetype (not per level — level scaling is handled by the curve).
  * - `id` must be unique across the entire array.
  * - `minLevel` must be >= 1.
- * - `rollableAttributes` must be non-empty and contain valid Attribute values.
+ * - `rollableAttributes` must be non-empty and contain valid Stat values.
  * - `slot` must be a valid EquipmentSlot.
  *
  * To add a new gear type: add a row here. No engine code changes needed.
@@ -20,7 +20,7 @@ export const ITEM_BASES: readonly ItemBase[] = [
     kind: "equippable",
     slot: "weapon",
     minLevel: 1,
-    rollableAttributes: ["STR"],
+    rollableAttributes: ["attack", "physicalDamage"],
   },
   {
     id: "leather-helm",
@@ -28,7 +28,7 @@ export const ITEM_BASES: readonly ItemBase[] = [
     kind: "equippable",
     slot: "helm",
     minLevel: 1,
-    rollableAttributes: ["HP"],
+    rollableAttributes: ["hp"],
   },
   {
     id: "leather-body",
@@ -36,7 +36,7 @@ export const ITEM_BASES: readonly ItemBase[] = [
     kind: "equippable",
     slot: "body",
     minLevel: 1,
-    rollableAttributes: ["HP"],
+    rollableAttributes: ["hp"],
   },
   {
     id: "leather-gloves",
@@ -44,7 +44,7 @@ export const ITEM_BASES: readonly ItemBase[] = [
     kind: "equippable",
     slot: "gloves",
     minLevel: 1,
-    rollableAttributes: ["AGI"],
+    rollableAttributes: ["armor"],
   },
   {
     id: "leather-boots",
@@ -52,7 +52,7 @@ export const ITEM_BASES: readonly ItemBase[] = [
     kind: "equippable",
     slot: "boots",
     minLevel: 1,
-    rollableAttributes: ["AGI"],
+    rollableAttributes: ["armor"],
   },
   {
     id: "copper-ring",
@@ -60,7 +60,7 @@ export const ITEM_BASES: readonly ItemBase[] = [
     kind: "equippable",
     slot: "ring",
     minLevel: 1,
-    rollableAttributes: ["INT", "STR"],
+    rollableAttributes: ["attack", "hp"],
   },
   {
     id: "copper-amulet",
@@ -68,7 +68,7 @@ export const ITEM_BASES: readonly ItemBase[] = [
     kind: "equippable",
     slot: "amulet",
     minLevel: 1,
-    rollableAttributes: ["MP"],
+    rollableAttributes: ["hp"],
   },
 
   // ── Tier 2 — unlocked from level 10 ───────────────────────────────────────
@@ -78,6 +78,6 @@ export const ITEM_BASES: readonly ItemBase[] = [
     kind: "equippable",
     slot: "body",
     minLevel: 10,
-    rollableAttributes: ["HP", "STR"],
+    rollableAttributes: ["hp", "armor"],
   },
 ];
