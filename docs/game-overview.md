@@ -78,7 +78,7 @@ applied in this order to each incoming hit:
 1. block chance / dodge chance — same mechanism: a chance to avoid the hit entirely
    (0 damage). only applies to physical damage.
 2. damage reduction % — first mitigation layer (percentage off the remaining damage).
-3. armor — reduces the damage received. [PLACEHOLDER: exact armor → reduction formula]
+3. armor — reduces the damage received. let's create a simple formula for now
 4. damage absorption — last layer, subtracts a flat value.
 
 if the hit is not blocked or dodged, the damage actually received is **at minimum 1** after
@@ -158,7 +158,20 @@ stats buffs - hp, attack, attack speed, cooldown reduction
 
 the runes are organized as a **tree** (nodes with prerequisites), not a flat shop.
 
-[PLACEHOLDER: rune tree structure — nodes, prerequisites, costs, and caps]
+rune structure: it starts with one node, after taking it, it branches to 2 sides.
+
+then, each side branches to 3 sides. at the end, there are 3 sides.
+
+1: increase stats globally like: max hp, attack damage, attack speed
+2: increase exp received: exp percentage, flat exp per monster, per boss
+3: enhave drop chances, increase chest capacity
+4: increase gold received: gold percentage, flat gold per monster, per boss
+5: enhance inventory: increase amount of inventory slots, increase amount of stashes
+6: implement quality of life: increase skill slots, increase hero slots, increase group slots
+
+there are no pre-requisites, they only cost gold
+
+each node has a max level. it will need to be balanced, we don't know yet, each level will have different costs. a new step into the branch, higher is the cost, unlocking one node, it will show the adjacent nodes.
 
 ## economy
 
@@ -170,9 +183,12 @@ the runes are organized as a **tree** (nodes with prerequisites), not a flat sho
 - nothing hard-caps farming; what discourages grinding a low stage is **time** — advancing to
   harder stages earns more gold per minute.
 
-[PLACEHOLDER: gold amounts / scaling per stage and per source (monster / stage boss / act boss)]
-[PLACEHOLDER: name + source of the second currency, and what it buys]
-[PLACEHOLDER: gold sinks list and prices (runes, inventory/stash expansion, revive cost)]
+at the endgame, with all the buffs, deafeating a normal weak monster will give 1k gold, a normal strong monster will give 2k gold
+at the beginning of the game, at the first stage of the first act, a normal monster will give 1 gold and the boss will give 10x that.
+
+we don't have the second currency defined yet, we can ignore it for now
+
+for now, the only gold sink is the runes tree
 
 # Inventory and stash
 
@@ -199,13 +215,11 @@ recycle - combine items of the same rarity into one of the next rarity. start wi
 the player might buy a perk from the rune tree to improve it. the output item is a **fresh
 roll** — its stats are rolled anew, not inherited from the inputs. equips combine into
 equips, misc into misc, modifiers into modifiers — the item type limits what can be combined.
-selling - sell items for gold. [PLACEHOLDER: sell value per rarity / item level]
+selling - sell items for gold
 crafting - combine misc items into equipments. **deferred for now.**
 
 the cube system also has levels - each level will unlock a different item tier. the cube gains
 exp through **usage**, and that exp gain can be modified/buffed by the rune system.
-
-[PLACEHOLDER: cube exp curve — usage needed per cube level, and the rune buff to it]
 
 tiers are the item level thresholds
 1~10
@@ -214,10 +228,31 @@ tiers are the item level thresholds
 30~40
 50~60
 
-[PLACEHOLDER: fix the tier thresholds — current ranges overlap (10, 15) and leave a gap (40~50)]
-
 let's say the player selects the threshold 1~10, if they try to salvage/recycle an item lvl 15 it will block. because the item is higher than the threshold.
 also, the item cannot be lower than the threshold.
+
+check the `cube.md` file for specifications when we implement the cube.
+
+# selling items
+
+lvl 1 common - 10 gold
+lvl 1 uncommon - 20 gold
+lvl 1 rare - 90
+lvl 1 legendary - 270
+lvl 1 immortal - 810
+
+lvl 10 common - 250
+lvl 10 uncommon - 750 gold
+lvl 10 rare - 2250
+lvl 10 legendary - 6750
+lvl 10 immortal - 20250
+
+lvl 15 common - 880
+lvl 15 uncommon - 2640 gold
+lvl 15 rare - 7920
+lvl 15 legendary - 23760
+lvl 15 immortal - 71280
+lvl 15 arcana - 228096
 
 # item modifiers
 
@@ -227,10 +262,13 @@ we need 3 different types of it
 
 type 1 - decorating
 type 2 - engraving
-type 3 - something else [PLACEHOLDER: name + purpose of the third modifier type]
+type 3 - be creative with the name - the third slot is a generic one - only super rare items will contain it
 
-[PLACEHOLDER: what each modifier type actually grants (which stats), and how modifiers are
-inserted into / removed from an equip's slots]
+decorating, engravings and the third can give the same types of stats, the difference will the amount of slots in which rarity
+
+those slots will receive/remove stats with the cube, the cube will consume the item modifier item to apply it. like a gem bem inserted into an equipment. each item modifier will have different stats and values depending on the equipment type.
+
+check the items in the `material-effects.md` file.
 
 each equip can have item modifier slots, the amount and the types will be determined by the item rarity
 
@@ -320,8 +358,10 @@ the chest rarity will modify the drop chances of items, will modify the rarity t
 if both the inventory and the stash are full, dropped loot is **lost** — this pushes the
 player to come back and check the game periodically.
 
-[PLACEHOLDER: drop table — per chest rarity, the item rarities it can roll and their chances;
-ties into the stage's item level]
+let's create a function to roll the chests for now... the first drop should be 100%, a weapon for the specific class the player is using.
+
+the first chest:
+dropped in 1-1, 1-2 and 1-3 with 16% of chances - grade odds: 78% common, 20.6% uncommon, 1.37% rare - best weighted rewards: 31% armor (helmet, body armor, gloves or boots), 25% weapon (any class)
 
 # battle
 
@@ -352,7 +392,9 @@ let's say you put the melee as the last one, and a range as the first one... the
 - a paid instant revive may also be offered: it could cost gold, and that cost could increase
   with the stage difficulty.
 
-[PLACEHOLDER: base respawn time, the rune improvement to it, and the instant-revive gold cost formula]
+the base respawn time is 2min - the runes can reduce this time with flat seconds and percentage
+
+the gold cost needs a formula, we can start with a placeholder, we balance it later
 
 # idle / offline progress
 
@@ -360,7 +402,9 @@ this is an idle game: with the app closed, the group keeps progressing (clearing
 stage and earning rewards) for a **limited** amount of time. the player can extend this
 offline window through the runes system.
 
-[PLACEHOLDER: base offline duration, how runes extend it, and how offline rewards are computed/granted on return]
+the base offline duration is 8h, and it can be increased by runes like +1h and percentage increase
+
+the offline rewards are gold and experience. it will be calculated by the latest time the selected stage was cleared.
 
 # pacing and meta
 
