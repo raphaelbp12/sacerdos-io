@@ -48,7 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M20 — Persistence (save / load)** (done). Next up: ⬜ **M21 — Idle / offline progress**.
+**Current focus:** ✅ **M21 — Idle / offline progress** (done). 🎉 All milestones M1–M21 complete.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -72,7 +72,7 @@ Do this, in order:
 | M18 | Runes tree                               | D     | ✅     | ✅    | —             |
 | M19 | Groups & roster                          | E     | ✅     | ✅    | —             |
 | M20 | Persistence (save / load)                | E     | ✅     | ✅    | D-007         |
-| M21 | Idle / offline progress                  | E     | ⬜     | ⬜    | —             |
+| M21 | Idle / offline progress                  | E     | ✅     | ✅    | —             |
 
 > **Granularity rule.** This table tracks **milestone-level** status. When a milestone starts,
 > author a dedicated `docs/milestone-N-plan.md` (same format as
@@ -506,6 +506,30 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-22 — M21 Idle / offline progress (complete)
+
+- **Did:** added the **outer-layer** `src/offline/` module TDD-first (deps `offline → persistence
+→ domain`; nothing in the domain imports it). `offline.ts`: `simulateElapsed(state, deltaMs, rng,
+options?) → OfflineReport` — **pure** (reads `GameState`, mutates nothing). Reuses the **real**
+  M10 battle tick (no parallel sim, DRY): clamps elapsed to `[0, ceilingMs]` (`DEFAULT_OFFLINE_
+CEILING_MS` = 8 h), resolves the active stage from `progression` (`actByIndex`/`stageAt`) and the
+  active group (first owned), then loops — rebuilds a **fresh full-HP party** each stage
+  (`buildRoster` + `group.buildParty` = "revive-all at stage start") and runs a `StageRunner` in
+  fixed `OFFLINE_TICK_STEP_MS` (100 ms) steps until `cleared`/`wiped`/out-of-time. Each cleared
+  stage pays gold (`goldForKill`, rune-modified via `runes.goldModifiersFor`), xp (`xpForKill`),
+  and rolls one chest item (`rollDrop` over `COMMON_CHEST_TABLE` at `stageItemLevel`); kept items
+  are capped to inventory free slots, the overflow counted as `itemsLost` (rolls still advance the
+  rng → deterministic). A wipe or a timed-out partial stage ends the run with no payout. Report =
+  `{ elapsedMs, stagesCleared, gold, xp, items, itemsLost }`; the shell applies it. **475 tests
+  green (+7); typecheck + lint + build pass.** Plan: `docs/milestone-21-offline-plan.md`.
+- **Tracker change:** M21 ⬜→✅ (Status + Tests). 🎉 **M1–M21 all complete.**
+- **Deferrals:** appended **D-037** (applying offline XP to characters — no `totalXp` field on
+  `SavedCharacter` yet, xp is reported only) and **D-038** (offline fidelity/perf: closed-form
+  kills-per-second fast path + an offline-window rune perk that extends the ceiling).
+- **Next action:** roadmap milestones are done. Remaining work is **tuning/UI/storage** via the
+  open `D-###`s — notably D-036 (storage adapter + autosave) and D-016 (battle visuals / UI shell)
+  to surface the simulated loop and offline report to the player.
 
 ### 2026-06-22 — M20 Persistence (save / load) (complete)
 

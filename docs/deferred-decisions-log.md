@@ -55,6 +55,8 @@
 | D-034 | Per-group formation capacity value         | M19         | Deferred | When formation size needs tuning / a stat or rune source     |
 | D-035 | Save-format migrations across versions     | M20         | Deferred | When a `SAVE_VERSION` bump must read older saves             |
 | D-036 | Save storage adapter + autosave cadence    | M20         | Deferred | When the shell must persist to localStorage / file / cloud   |
+| D-037 | Applying offline XP to characters          | M21         | Deferred | When `SavedCharacter` gains a `totalXp` / progression field  |
+| D-038 | Offline fidelity / batching + window perk  | M21         | Deferred | When idle accuracy/perf matter (closed-form kills/sec)       |
 
 ---
 
@@ -159,6 +161,28 @@
 - **Why deferred (M20):** M20 is the pure DTO ↔ domain mapper only; persistence-to-storage is
   an outer-shell concern that must not leak into the mapper (keeps it pure and testable).
 - **Revisit trigger:** When the UI shell needs sessions to actually survive a reload.
+
+### D-037 — Applying offline XP to characters
+
+- **What:** Translating the XP earned during offline farming into actual character level-ups.
+  `simulateElapsed` currently **reports** total pooled `xp` but cannot apply it: a
+  `SavedCharacter` stores its `level` directly, with no `totalXp` accumulator to add to.
+- **Why deferred (M21):** Adding a persistent XP field touches the M20 save format and the
+  character recipe model — a separable change. Reporting xp keeps the offline loop complete and
+  testable without forcing that schema decision now.
+- **Revisit trigger:** When characters gain a persistent `totalXp` (and `levelForTotalXp` drives
+  their level) so offline xp can be banked and applied on return.
+
+### D-038 — Offline fidelity / batching + offline-window perk
+
+- **What:** A faster, higher-fidelity offline model: a closed-form "kills/gold/xp per second"
+  fast path instead of fixed-step ticking the full battle, finer movement integration, and an
+  **offline-window rune perk** that extends `DEFAULT_OFFLINE_CEILING_MS`.
+- **Why deferred (M21):** M21 reuses the real battle tick at a coarse `OFFLINE_TICK_STEP_MS`
+  (DRY, deterministic, correct) — good enough for the first idle loop. Performance and a tunable
+  ceiling are optimization/tuning, not correctness.
+- **Revisit trigger:** When long offline windows are slow to simulate, or design wants a rune /
+  upgrade that lengthens the offline cap.
 
 ### D-008 — XP / leveling system
 
