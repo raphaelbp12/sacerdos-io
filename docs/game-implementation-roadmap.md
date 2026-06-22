@@ -48,7 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M14 — Drop tables & chests** (done). Next up: ⬜ **M15 — Inventory & stash capacity**.
+**Current focus:** ✅ **M15 — Inventory & stash capacity** (done). Next up: ⬜ **M16 — Item modifiers / gems**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -66,7 +66,7 @@ Do this, in order:
 | M12 | Death & revive                           | B     | ✅     | ✅    | D-017 (sets)  |
 | M13 | Economy & gold                           | C     | ✅     | ✅    | —             |
 | M14 | Drop tables & chests                     | C     | ✅     | ✅    | D-005         |
-| M15 | Inventory & stash capacity               | C     | ⬜     | ⬜    | —             |
+| M15 | Inventory & stash capacity               | C     | ✅     | ✅    | —             |
 | M16 | Item modifiers / gems                    | D     | ⬜     | ⬜    | D-001/002/003 |
 | M17 | Cube system                              | D     | ⬜     | ⬜    | —             |
 | M18 | Runes tree                               | D     | ⬜     | ⬜    | —             |
@@ -507,7 +507,31 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 
 <!-- Newest entries on top -->
 
-### 2026-06-21 — M14 Drop tables & chests (complete)
+### 2026-06-22 — M15 Inventory & stash capacity (complete)
+
+- **Did:** generalized `src/domain/items/inventory.ts` in place (TDD-first) with an optional
+  `capacity` (default `Infinity` = unlimited, so the UI's `new Inventory()` and every existing
+  test are unchanged) and a `StackPolicy` (`DEFAULT_STACK_POLICY` stacks `kind === "misc"`;
+  equippables / consumables / modifiers / boss keys each take their own slot). Slots are
+  **computed, not stored** (`stacks` groups stackable items by id; `slotsUsed` = stacks length).
+  Added `hasSpace()` (item-agnostic `LootSink` contract), `canAccept(item)` (item-aware: a
+  stackable item joins an existing same-id stack even when full), and `add` now returns a boolean
+  (false + no mutation when no room). `Inventory` structurally satisfies M14's `LootSink` without
+  importing `loot` (one-way deps preserved). Added `stash.ts`: `Stash` = ordered `Inventory`
+  tabs (starts ≥1) + free `moveItem(from, to, item)` (atomic — verifies `to.canAccept` before
+  mutating `from`; works inventory↔tab and tab↔tab). Headline tests green: two identical misc
+  items → 1 slot (count 2); distinct ids → own slots; cap blocks the (n+1)-th distinct item;
+  move respects both source presence and destination capacity/stacking. **369 tests green (+17);
+  lint + build pass.**
+- **Tracker change:** M15 ⬜→✅ (Status + Tests); steps 15.1–15.2 ticked. Plan:
+  `docs/milestone-15-plan.md`.
+- **Deferrals:** none new logged in the D-### log. Plan §3 notes punted in-doc: unbounded misc
+  stacks (no per-item `maxStack` yet), capacity-growth source (rune tree, M18), and
+  equipment-as-`Inventory` unification (stays with the `Equipment` class for now, revisit at M20).
+- **Next action:** start **M16 — Item modifiers / gems**: author `docs/milestone-16-*.md`;
+  `socket.ts` (per-item sockets by rarity — rare = 1 type-1 slot, legendary = 2; `applyMaterial` /
+  `extract` aggregate as one `ModifierSource`) then material data rows + seeded roll ranges
+  (advances D-001/D-002/D-003).
 
 - **Did:** added the pure-domain `src/domain/loot/` module TDD-first (imports `items` + `rng`;
   nothing inner imports it). Refactored `generate-item.ts` to take **optional** `base`/`rarity`

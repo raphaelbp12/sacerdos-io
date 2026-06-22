@@ -8,6 +8,9 @@ export type { ItemKind, Item } from "./item";
 
 export { Equipment } from "./equipment";
 export { Inventory } from "./inventory";
+export type { StackPolicy, ItemStack } from "./inventory";
+export { DEFAULT_STACK_POLICY } from "./inventory";
+export { Stash, moveItem } from "./stash";
 export { SEED_ITEMS } from "./seed-items";
 export { scaleItem } from "./scale-item";
 
