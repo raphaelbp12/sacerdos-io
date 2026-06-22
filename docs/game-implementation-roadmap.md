@@ -48,7 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M18 — Runes tree** (done). Next up: ⬜ **M19 — Groups & roster**.
+**Current focus:** ✅ **M19 — Groups & roster** (done). Next up: ⬜ **M20 — Persistence (save / load)**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -70,7 +70,7 @@ Do this, in order:
 | M16 | Item modifiers / gems                    | D     | ✅     | ✅    | D-001/002/003 |
 | M17 | Cube system                              | D     | ✅     | ✅    | —             |
 | M18 | Runes tree                               | D     | ✅     | ✅    | —             |
-| M19 | Groups & roster                          | E     | ⬜     | ⬜    | —             |
+| M19 | Groups & roster                          | E     | ✅     | ✅    | —             |
 | M20 | Persistence (save / load)                | E     | ⬜     | ⬜    | D-007         |
 | M21 | Idle / offline progress                  | E     | ⬜     | ⬜    | —             |
 
@@ -506,6 +506,31 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-22 — M19 Groups & roster (complete)
+
+- **Did:** added the pure-domain `src/domain/roster/` module TDD-first (imports `combat` +
+  `battle` only; nothing inner imports it; never imports `runes` — slot caps are injected as
+  plain numbers). `roster.ts`: `RosterMember` (`id` + `combatant` + optional `skills`/
+  `attackElement` — exactly a `BattleUnit`'s inputs), `Roster` (owned characters keyed by id,
+  hero-slot `capacity` default `DEFAULT_HERO_SLOTS=3`; `add` returns `false`+no-mutation on
+  full/duplicate like M15 `Inventory`, `remove`/`get`/`has`/`members` insertion-ordered).
+  `group.ts`: `Group` (ordered formation of member ids, front-to-back; `add`/`remove`/`move`
+  reorder; `DEFAULT_FORMATION_CAPACITY=5`) with `buildParty(roster)` → `"party"` `BattleUnit`s in
+  formation order at placeholder `x=0` (**`StageRunner.spawnWave` assigns `x=PARTY_START_X+i×
+UNIT_SPACING` by index** — formation order _is_ battlefield order, no new positioning code), plus
+  `GroupRoster` (owned groups, group-slot `capacity` default `DEFAULT_GROUP_SLOTS=1`). Wiring test
+  drives the **real** rune nodes: `new Roster(runes.heroSlots(3))` grows with `buy("fellowship")`,
+  `new GroupRoster(runes.groupSlots(1))` grows with `buy("warband")` (resolves the slot half of
+  D-033). **459 tests green (+20); typecheck + lint + build pass.**
+- **Tracker change:** M19 ⬜→✅ (Status + Tests); plan: `docs/milestone-19-roster-plan.md`.
+- **Deferrals:** D-019 (second currency + character/group **shop**) stays deferred — collections
+  exist but are populated directly for now. Appended **D-034** (per-group formation-capacity value
+  / whether it should derive from a stat/rune — `DEFAULT_FORMATION_CAPACITY=5` is a placeholder).
+- **Next action:** start **M20 — Persistence (save / load)** (resolves D-007): author
+  `docs/milestone-20-*.md`; `serialize.ts` mapper in the **outer** layer (pure DTO ↔ domain, keeps
+  domain pure) covering roster/groups, equipment, inventory/stash, wallet, runes, cube level,
+  progression; test = round-trip equality of a populated state.
 
 ### 2026-06-22 — M18 Runes tree (complete)
 

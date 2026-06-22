@@ -51,6 +51,8 @@
 | D-029 | Full material catalogue                    | M16         | Deferred | When content/balancing needs the complete gem table          |
 | D-018 | Cube crafting / offering / etc. operations | M17         | Deferred | When item depth needs craft/offer/decorate/engrave/inscribe  |
 | D-030 | Cube gold/EXP weighting & curve tuning     | M17         | Deferred | When the cube economy needs material/gear weighting + tuning |
+| D-019 | Second currency + character/group shop     | M19         | Deferred | When acquiring characters/groups needs a shop + currency     |
+| D-034 | Per-group formation capacity value         | M19         | Deferred | When formation size needs tuning / a stat or rune source     |
 
 ---
 
@@ -429,8 +431,40 @@
   (slots → M19, offline → M21) or have no modifier parameter to thread through (`xpForKill`).
 - **Revisit trigger:** M19 (slots), M21 (offline), or whenever `xpForKill` grows an exp-modifier
   parameter mirroring `goldForKill`.
+- **Partially resolved (M19):** `heroSlots` / `groupSlots` are now consumed — `Roster` /
+  `GroupRoster` take their capacity from `RuneState.heroSlots(base)` / `groupSlots(base)`. Still
+  deferred: `skillSlots` (no skill-loadout cap consumer yet), `expPercent` (`xpForKill` has no
+  modifier param), and the offline-window perk (M21).
 - **Related:** `expPercent` / slot getters in [src/domain/runes/rune-state.ts](../src/domain/runes/rune-state.ts);
-  `xpForKill` in [src/domain/stages/xp.ts](../src/domain/stages/xp.ts).
+  `xpForKill` in [src/domain/stages/xp.ts](../src/domain/stages/xp.ts);
+  `Roster` / `GroupRoster` in [src/domain/roster/](../src/domain/roster/).
+
+### D-019 — Second currency + character / group shop
+
+- **What:** Acquiring new characters and groups from a shop, paid with a dedicated, scarcer
+  currency (overview: "new characters and groups are acquired later, not created freely … a
+  dedicated, scarcer currency is spent to buy characters and groups"). M19 ships the **owned**
+  collections (`Roster`, `GroupRoster`) and their slot caps, but they are populated directly
+  (tests / default seed / UI) — there is no purchase flow or second currency.
+- **Why deferred (M19):** the overview explicitly punts the shop and currency ("we will implement
+  it later, no need to care about them now"). M19's job is the roster/group data model + formation
+  that feeds battle; acquisition is an outer economy concern.
+- **Revisit trigger:** when the game needs a progression sink for fielding more heroes/groups —
+  i.e. when a second currency and a shop screen are designed.
+- **Related:** `Roster` / `GroupRoster` in [src/domain/roster/](../src/domain/roster/);
+  `Wallet` in [src/domain/economy/wallet.ts](../src/domain/economy/wallet.ts) (the first currency).
+
+### D-034 — Per-group formation capacity value
+
+- **What:** How many characters a single group may field. M19 caps it at
+  `DEFAULT_FORMATION_CAPACITY = 5`, a placeholder chosen only to have a finite cap. Open: the real
+  number, and whether formation size should derive from another source (a stat, a rune perk, or a
+  per-group upgrade) rather than a flat constant.
+- **Why deferred (M19):** the overview pins the _roster_ size (3 hero slots) and _group_ count
+  (1 group slot) and says both are rune-expandable, but never fixes how many heroes fit in one
+  group's formation. Picking that needs live battle tuning (front/back rank balance).
+- **Revisit trigger:** when battles need a tuned formation size, or a rune/upgrade that grows it.
+- **Related:** `DEFAULT_FORMATION_CAPACITY` / `Group` in [src/domain/roster/group.ts](../src/domain/roster/group.ts).
 
 ---
 
