@@ -1,6 +1,7 @@
 import type { Modifier, ModifierSource } from "../stats/modifier";
 import type { EquipmentSlot } from "./equipment-slot";
 import type { Item } from "./item";
+import { effectiveModifiers } from "./socket";
 
 export class Equipment implements ModifierSource {
   private readonly slots = new Map<EquipmentSlot, Item>();
@@ -40,7 +41,7 @@ export class Equipment implements ModifierSource {
   getModifiers(): readonly Modifier[] {
     const result: Modifier[] = [];
     for (const item of this.slots.values()) {
-      result.push(...item.modifiers);
+      result.push(...effectiveModifiers(item));
     }
     return result;
   }

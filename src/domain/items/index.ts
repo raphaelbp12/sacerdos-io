@@ -20,3 +20,16 @@ export { baseValueForLevel } from "./level-curve";
 export { rollRarity } from "./roll-rarity";
 export type { GenerateOptions } from "./generate-item";
 export { generateItem } from "./generate-item";
+
+export type { SocketType, EquipCategory, Socket } from "./socket";
+export {
+  SOCKET_LAYOUT,
+  socketLayout,
+  categoryForSlot,
+  emptySocketsFor,
+  effectiveModifiers,
+  applyMaterial,
+  extract,
+} from "./socket";
+export type { MaterialStatRange, MaterialDef } from "./material";
+export { MATERIALS, materialById, rollMaterial } from "./material";

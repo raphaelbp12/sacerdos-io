@@ -48,7 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M15 — Inventory & stash capacity** (done). Next up: ⬜ **M16 — Item modifiers / gems**.
+**Current focus:** ✅ **M16 — Item modifiers / gems** (done). Next up: ⬜ **M17 — Cube system**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -67,7 +67,7 @@ Do this, in order:
 | M13 | Economy & gold                           | C     | ✅     | ✅    | —             |
 | M14 | Drop tables & chests                     | C     | ✅     | ✅    | D-005         |
 | M15 | Inventory & stash capacity               | C     | ✅     | ✅    | —             |
-| M16 | Item modifiers / gems                    | D     | ⬜     | ⬜    | D-001/002/003 |
+| M16 | Item modifiers / gems                    | D     | ✅     | ✅    | D-001/002/003 |
 | M17 | Cube system                              | D     | ⬜     | ⬜    | —             |
 | M18 | Runes tree                               | D     | ⬜     | ⬜    | —             |
 | M19 | Groups & roster                          | E     | ⬜     | ⬜    | —             |
@@ -506,6 +506,32 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-22 — M16 Item modifiers / gems (complete)
+
+- **Did:** added per-item **sockets** + **materials** under `src/domain/items/` TDD-first.
+  `socket.ts`: `SocketType` (1/2/3), `EquipCategory`, `Socket`, `SOCKET_LAYOUT` (rarity → socket
+  types — Common/Uncommon none, Rare `[1]`, Epic/Legendary `[1,1]`), `socketLayout`,
+  `categoryForSlot` (weapon→weapon, helm/body/gloves/boots→armor, ring/amulet→accessory),
+  `emptySocketsFor`, `effectiveModifiers(item)` (base affixes ++ socketed material modifiers — the
+  single aggregated source), immutable `applyMaterial(item, material, rng)` (auto-places into the
+  first free socket whose type matches; returns `undefined` + untouched item when none) and
+  `extract(item, index)`. `material.ts`: `MaterialDef`/`MaterialStatRange`, a representative
+  `MATERIALS` subset of [material-effects.md](material-effects.md) (Minor Ruby/Amethyst/Emerald
+  type-1, Goblin Hide type-2), `materialById`, and `rollMaterial(rng, mat, category)` drawing a
+  continuous value in `[min,max]` (D-002 ranges land here). Added optional `sockets?` to `Item`;
+  `Equipment.getModifiers` now aggregates via `effectiveModifiers` (socket-less items unchanged ⇒
+  all prior tests green). **389 tests green (+20); typecheck + lint + build pass.**
+- **Tracker change:** M16 ⬜→✅ (Status + Tests); steps 16.1–16.2 ticked. Plan:
+  `docs/milestone-16-plan.md`. Advanced D-001/D-002/D-003 (D-002 resolved — material rolls now
+  use min–max bands; D-003 resolved — sockets stack multiple modifiers on one item).
+- **Deferrals:** appended **D-027** (type-2/3 sockets + Immortal/Mythical rarities await rarity
+  expansion), **D-028** (engraving 50/50 dual-stat roll), **D-029** (full material catalogue).
+  `generateItem` left untouched (snapshots intact) — sockets are inserted by the cube (M17).
+- **Next action:** start **M17 — Cube system**: author `docs/milestone-17-*.md`; `synthesis.ts`
+  (N-of-same-rarity → 1 fresh higher-rarity, type/level-gated), `alchemy.ts` (sell-value table),
+  `cube-exp.ts` (EXP per consumed item, level-gated ops). The cube also becomes the system that
+  inserts/extracts materials into the M16 sockets.
 
 ### 2026-06-22 — M15 Inventory & stash capacity (complete)
 

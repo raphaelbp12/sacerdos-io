@@ -22,30 +22,33 @@
 
 ## Index
 
-| ID    | Title                                  | Deferred in | Status   | Revisit trigger (short)                                  |
-| ----- | -------------------------------------- | ----------- | -------- | -------------------------------------------------------- | --- | ----- | -------------------------- | --- | -------- | ------------------------------------------------- | --- | ----- | ------------------------------------- | --- | -------- | ---------------------------------------------------- |
-| D-001 | Affix system (prefixes/suffixes)       | M5          | Deferred | After combat makes loot quality matter                   |
-| D-002 | Modifier value _ranges_ (min–max)      | M5          | Deferred | Alongside the affix system                               |
-| D-003 | Multiple modifiers per item            | M5          | Deferred | With affixes; count scales with rarity                   |
-| D-004 | Named / unique items & crafting        | M5          | Deferred | After affixes; needs a baseline of item depth            |
-| D-005 | Drop tables / loot sources             | M5          | Resolved | Resolved in M14 (drop tables + chests)                   |
-| D-006 | Consumable generation                  | M5          | Deferred | When consumables need variety beyond seed set            |
-| D-007 | Persistence (save / load)              | M5          | Deferred | When losing state between sessions becomes painful       |
-| D-008 | XP / leveling system                   | pre-M6      | Resolved | Level curve M7; kills award XP (split) M11 (D-024 tunes) |
-| D-009 | Enemy / monster system                 | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                     |
-| D-010 | Stat cache / memoization               | M1          | Deferred | Only if profiling shows getStat() is a hotspot           |
-| D-011 | Skills as class-gated buffs            | M3          | Resolved | Built in M8 (`src/domain/skills/`)                       |
-| D-012 | Advanced on-hit effects                | M6          | Deferred | When gear/skills need regen, leech, per-hit effects      |
-| D-013 | Additional classes beyond Knight       | M7          | Deferred | When a second class / class-select UI is wanted          |
-| D-014 | Enemy skill-casting                    | M8          | Deferred | When monsters need fireball / cold-bolt abilities        |
-| D-015 | Concrete skill ranges ("tune live")    | M8          | Deferred | When the battle has positions (M10) to tune against      |
-| D-020 | Respec cost / cooldown                 | M7          | Deferred | If free refunds make builds feel weightless              |
-| D-021 | Monster stat variance (rng roll)       | M9          | Deferred | When fights feel too uniform / need per-spawn spread     |
-| D-016 | Battle visuals / formation UI / juice  | M10         | Deferred | When the battle needs a real-time view & polish          |     | D-017 | Paid-revive cost balancing | M12 | Deferred | When the revive economy needs real pricing/tuning |     | D-022 | Per-unit / stat-driven movement speed | M10 | Deferred | When unit speed should differ (ranged kiting, haste) |
-| D-023 | Buff / debuff skills applied in-battle | M10         | Deferred | When combatants can carry dynamic modifier sources       |
-| D-024 | XP → level curve balancing             | M11         | Deferred | When leveling pace needs tuning against content          |
-| D-025 | Per-difficulty extra elements          | M11         | Deferred | When hard should add elements (e.g. act 2 → cold)        |
-| D-026 | Gold scaling / balance curve           | M13         | Deferred | When rune buffs (M18) + stage spread allow real tuning   |
+| ID    | Title                                      | Deferred in | Status   | Revisit trigger (short)                                     |
+| ----- | ------------------------------------------ | ----------- | -------- | ----------------------------------------------------------- | --- | ----- | -------------------------- | --- | -------- | ------------------------------------------------- | --- | ----- | ------------------------------------- | --- | -------- | ---------------------------------------------------- |
+| D-001 | Affix system (prefixes/suffixes)           | M5          | Deferred | After combat makes loot quality matter                      |
+| D-002 | Modifier value _ranges_ (min–max)          | M5          | Resolved | Resolved in M16 (material rolls draw within a min–max band) |
+| D-003 | Multiple modifiers per item                | M5          | Resolved | Resolved in M16 (sockets stack materials on one item)       |
+| D-004 | Named / unique items & crafting            | M5          | Deferred | After affixes; needs a baseline of item depth               |
+| D-005 | Drop tables / loot sources                 | M5          | Resolved | Resolved in M14 (drop tables + chests)                      |
+| D-006 | Consumable generation                      | M5          | Deferred | When consumables need variety beyond seed set               |
+| D-007 | Persistence (save / load)                  | M5          | Deferred | When losing state between sessions becomes painful          |
+| D-008 | XP / leveling system                       | pre-M6      | Resolved | Level curve M7; kills award XP (split) M11 (D-024 tunes)    |
+| D-009 | Enemy / monster system                     | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                        |
+| D-010 | Stat cache / memoization                   | M1          | Deferred | Only if profiling shows getStat() is a hotspot              |
+| D-011 | Skills as class-gated buffs                | M3          | Resolved | Built in M8 (`src/domain/skills/`)                          |
+| D-012 | Advanced on-hit effects                    | M6          | Deferred | When gear/skills need regen, leech, per-hit effects         |
+| D-013 | Additional classes beyond Knight           | M7          | Deferred | When a second class / class-select UI is wanted             |
+| D-014 | Enemy skill-casting                        | M8          | Deferred | When monsters need fireball / cold-bolt abilities           |
+| D-015 | Concrete skill ranges ("tune live")        | M8          | Deferred | When the battle has positions (M10) to tune against         |
+| D-020 | Respec cost / cooldown                     | M7          | Deferred | If free refunds make builds feel weightless                 |
+| D-021 | Monster stat variance (rng roll)           | M9          | Deferred | When fights feel too uniform / need per-spawn spread        |
+| D-016 | Battle visuals / formation UI / juice      | M10         | Deferred | When the battle needs a real-time view & polish             |     | D-017 | Paid-revive cost balancing | M12 | Deferred | When the revive economy needs real pricing/tuning |     | D-022 | Per-unit / stat-driven movement speed | M10 | Deferred | When unit speed should differ (ranged kiting, haste) |
+| D-023 | Buff / debuff skills applied in-battle     | M10         | Deferred | When combatants can carry dynamic modifier sources          |
+| D-024 | XP → level curve balancing                 | M11         | Deferred | When leveling pace needs tuning against content             |
+| D-025 | Per-difficulty extra elements              | M11         | Deferred | When hard should add elements (e.g. act 2 → cold)           |
+| D-026 | Gold scaling / balance curve               | M13         | Deferred | When rune buffs (M18) + stage spread allow real tuning      |
+| D-027 | Type-2/3 sockets & Immortal/Mythical tiers | M16         | Deferred | When the Rarity union expands past Legendary                |
+| D-028 | Engraving 50/50 dual-stat roll             | M16         | Deferred | When engraving needs its random-of-two-stats depth          |
+| D-029 | Full material catalogue                    | M16         | Deferred | When content/balancing needs the complete gem table         |
 
 ---
 
@@ -72,6 +75,9 @@
   and fully deterministic to test. Ranges add the "is this roll good?" excitement but need
   the affix structure to be meaningful.
 - **Revisit trigger:** Together with D-001. The `Rng` seam already supports it.
+- **Resolved (M16):** materials (`src/domain/items/material.ts`) carry per-category `{min,max}`
+  bands and `rollMaterial` draws a value within them via the injected `Rng`. The same band
+  pattern is ready to extend to base-item affixes when D-001 lands.
 
 ### D-003 — Multiple modifiers per item
 
@@ -81,6 +87,10 @@
   only feel good once each modifier is a meaningful affix (D-001) and there's a reason to
   weigh trade-offs (combat).
 - **Revisit trigger:** Implement with D-001/D-002 as one "loot depth" milestone.
+- **Resolved (M16):** an item now carries multiple modifiers via **sockets** — `applyMaterial`
+  adds material modifiers that `effectiveModifiers` aggregates alongside the base affix, and the
+  socket **count scales by rarity** (`SOCKET_LAYOUT`). Multi-affix on the base item itself still
+  waits on D-001.
 
 ### D-004 — Named / unique items & crafting
 
@@ -317,6 +327,38 @@
 - **Revisit trigger:** When the rune tree (M18) supplies per-source gold modifiers and stages
   span the whole game, so the gold-per-minute economy can be tuned end to end.
 - **Related:** `goldForKill` / `BASE_GOLD` in [src/domain/economy/gold.ts](../src/domain/economy/gold.ts).
+
+### D-027 — Type-2/3 sockets & Immortal/Mythical rarities
+
+- **What:** The overview's full socket table grants **type-2 (engraving)** and **type-3
+  (inscription)** sockets to the higher rarities (Immortal: 2×type-1 + 1×type-2; Mythical adds a
+  type-3). Those rarities are not in our 5-tier `Rarity` union yet.
+- **Why deferred (M16):** M16 ships the socket machinery (`SOCKET_LAYOUT`, type-matching in
+  `applyMaterial`) and tests type-2 rejection with a type-2 material, but no current rarity grants
+  a type-2/3 socket. Adding empty rows would be dead data.
+- **Revisit trigger:** When the `Rarity` union expands past `Legendary`; add the
+  Immortal/Mythical rows to `SOCKET_LAYOUT` (data-only change).
+- **Related:** `SOCKET_LAYOUT` in [src/domain/items/socket.ts](../src/domain/items/socket.ts).
+
+### D-028 — Engraving 50/50 dual-stat roll
+
+- **What:** Engraving materials in [material-effects.md](../docs/material-effects.md) roll **one of
+  two** stats per slot (the doc's _(50% each)_ rows). M16 models a single stat per category.
+- **Why deferred (M16):** The dual-stat coin-flip is depth on top of the working single-stat roll;
+  `rollMaterial` already injects `Rng`, so adding a per-category stat **pair** + a pick is a
+  contained extension.
+- **Revisit trigger:** When engravings need to feel distinct from decorations beyond socket type.
+- **Related:** `rollMaterial` / `MaterialDef.byCategory` in [src/domain/items/material.ts](../src/domain/items/material.ts).
+
+### D-029 — Full material catalogue
+
+- **What:** Encode the complete ~60-row gem table from [material-effects.md](../docs/material-effects.md)
+  (all rarities, all categories, all tiers).
+- **Why deferred (M16):** M16 ships a representative subset that exercises type-1/type-2 and
+  flat/percentage rolls across all three categories. Transcribing the whole table is
+  content/balancing work, not engine work.
+- **Revisit trigger:** When the cube (M17) + drops surface real material variety to players.
+- **Related:** `MATERIALS` in [src/domain/items/material.ts](../src/domain/items/material.ts).
 
 ---
 
