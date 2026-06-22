@@ -52,7 +52,7 @@ import {
   DEFAULT_FORMATION_CAPACITY,
 } from "../domain/roster";
 import { StageRunner } from "../domain/battle";
-import type { StageStatus } from "../domain/battle";
+import type { StageStatus, BattleUnit } from "../domain/battle";
 import {
   actByIndex,
   stageAt,
@@ -111,6 +111,10 @@ export class GameSession {
   declare private groupSlots: number;
   private readonly chests: Chest[] = [];
   private firstChestDropped = false;
+  /** When true, {@link playStage} prints a per-tick combat trace to the console
+   * (wave spawns, HP rosters, damage dealt, deaths, rewards). Off by default so
+   * tests stay quiet; the UI flips it on to follow a fight live. */
+  debugBattle = false;
 
   constructor(state: GameState, rng: Rng) {
     this.rng = rng;
@@ -318,19 +322,83 @@ export class GameSession {
       this.rng,
     );
 
+    // Console trace, gated by `debugBattle` (no-ops when off — see the field doc).
+    const verbose = this.debugBattle;
+    const log = verbose ? (msg: string) => console.log(msg) : () => {};
+    const warn = verbose ? (msg: string) => console.warn(msg) : () => {};
+    const groupStart = verbose ? (msg: string) => console.group(msg) : () => {};
+    const groupEnd = verbose ? () => console.groupEnd() : () => {};
+
+    groupStart(
+      `[playStage] ${actIndex}-${stageIndex} (${difficulty}) — ${act.name}`,
+    );
+    log(
+      `party: ${party.length} unit(s), waves: ${runner.waveCount}, total monsters: ${runner.totalMonsters}`,
+    );
+
+    const hpOf = (u: BattleUnit) =>
+      Math.max(0, Math.ceil(u.combatant.currentHP));
+    const maxHpOf = (u: BattleUnit) => Math.round(u.combatant.getStat("hp"));
+    const rosterLine = (units: readonly BattleUnit[]) =>
+      units.map((u) => `${u.name} ${hpOf(u)}/${maxHpOf(u)}`).join(", ");
+
     let elapsed = 0;
+    let lastWaveIndex = -1;
+    let prevHp = new Map<BattleUnit, number>();
     while (runner.status === "ongoing" && elapsed < MAX_STAGE_MS) {
+      const battle = runner.currentBattle;
+      const units = [...battle.party, ...battle.enemies];
+
+      if (runner.currentWaveIndex !== lastWaveIndex) {
+        lastWaveIndex = runner.currentWaveIndex;
+        const isBoss = lastWaveIndex === runner.waveCount - 1;
+        log(
+          `→ wave ${lastWaveIndex + 1}/${runner.waveCount}${isBoss ? " (boss)" : ""} @ ${elapsed}ms — ${battle.enemies.length} enemy(ies)`,
+        );
+        log(`   party:   ${rosterLine(battle.party)}`);
+        log(`   enemies: ${rosterLine(battle.enemies)}`);
+        prevHp = new Map(units.map((u) => [u, hpOf(u)]));
+      }
+
       runner.tick(PLAY_TICK_STEP_MS);
       elapsed += PLAY_TICK_STEP_MS;
+
+      // Diff HP against the pre-tick snapshot to surface damage dealt + deaths.
+      for (const u of units) {
+        const before = prevHp.get(u) ?? hpOf(u);
+        const after = hpOf(u);
+        if (after < before) {
+          const dmg = before - after;
+          const tag = u.side === "party" ? "🛡" : "⚔";
+          if (after <= 0) {
+            log(
+              `   ${tag} ${u.name} took ${dmg} dmg → defeated @ ${elapsed}ms`,
+            );
+          } else {
+            log(
+              `   ${tag} ${u.name} took ${dmg} dmg (${after}/${maxHpOf(u)}) @ ${elapsed}ms`,
+            );
+          }
+        }
+        prevHp.set(u, after);
+      }
+    }
+
+    if (elapsed >= MAX_STAGE_MS) {
+      warn(`⏱ hit MAX_STAGE_MS (${MAX_STAGE_MS}ms) — fight never resolved`);
     }
 
     if (runner.status !== "cleared") {
+      log(`✖ wiped after ${elapsed}ms — retreating one stage`);
+      groupEnd();
       this.progression = {
         ...this.progression,
         position: retreat(this.progression.position),
       };
       return { status: "wiped", gold: 0, xp: 0, chests: [] };
     }
+
+    log(`✔ cleared in ${elapsed}ms`);
 
     const level = stageMonsterLevel(stage, difficulty);
     const monsterSource: GoldSource =
@@ -362,6 +430,11 @@ export class GameSession {
       ...this.progression,
       position: advance(this.progression.position),
     };
+
+    log(
+      `rewards: +${gold}g (${regularMonsters}×${monsterGold} + boss ${bossGold}), +${xp} xp, chest: ${chest.tier}`,
+    );
+    groupEnd();
 
     return { status: "cleared", gold, xp, chests: [chest] };
   }

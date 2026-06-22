@@ -36,6 +36,7 @@ export function BattleScreen() {
 
   function handlePlay() {
     act(() => {
+      session.debugBattle = true; // print the per-tick combat trace to the console
       const report = session.playStage();
       if (report.status === "cleared") {
         pushLog(
