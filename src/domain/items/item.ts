@@ -14,6 +14,12 @@ export interface Item {
   readonly kind: ItemKind;
   /** Minimum character level required to equip this item. */
   readonly levelReq: number;
+  /**
+   * The item level this item rolled at (its power tier). Drives cube thresholds,
+   * sell value and cube EXP. Absent on hand-authored items; `itemLevelOf` falls
+   * back to `levelReq` when this is undefined.
+   */
+  readonly itemLevel?: number;
   /** Required when kind === 'equippable'. */
   readonly slot?: EquipmentSlot;
   /** Passive modifiers active while the item is equipped. */

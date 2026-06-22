@@ -22,33 +22,35 @@
 
 ## Index
 
-| ID    | Title                                      | Deferred in | Status   | Revisit trigger (short)                                     |
-| ----- | ------------------------------------------ | ----------- | -------- | ----------------------------------------------------------- | --- | ----- | -------------------------- | --- | -------- | ------------------------------------------------- | --- | ----- | ------------------------------------- | --- | -------- | ---------------------------------------------------- |
-| D-001 | Affix system (prefixes/suffixes)           | M5          | Deferred | After combat makes loot quality matter                      |
-| D-002 | Modifier value _ranges_ (min–max)          | M5          | Resolved | Resolved in M16 (material rolls draw within a min–max band) |
-| D-003 | Multiple modifiers per item                | M5          | Resolved | Resolved in M16 (sockets stack materials on one item)       |
-| D-004 | Named / unique items & crafting            | M5          | Deferred | After affixes; needs a baseline of item depth               |
-| D-005 | Drop tables / loot sources                 | M5          | Resolved | Resolved in M14 (drop tables + chests)                      |
-| D-006 | Consumable generation                      | M5          | Deferred | When consumables need variety beyond seed set               |
-| D-007 | Persistence (save / load)                  | M5          | Deferred | When losing state between sessions becomes painful          |
-| D-008 | XP / leveling system                       | pre-M6      | Resolved | Level curve M7; kills award XP (split) M11 (D-024 tunes)    |
-| D-009 | Enemy / monster system                     | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                        |
-| D-010 | Stat cache / memoization                   | M1          | Deferred | Only if profiling shows getStat() is a hotspot              |
-| D-011 | Skills as class-gated buffs                | M3          | Resolved | Built in M8 (`src/domain/skills/`)                          |
-| D-012 | Advanced on-hit effects                    | M6          | Deferred | When gear/skills need regen, leech, per-hit effects         |
-| D-013 | Additional classes beyond Knight           | M7          | Deferred | When a second class / class-select UI is wanted             |
-| D-014 | Enemy skill-casting                        | M8          | Deferred | When monsters need fireball / cold-bolt abilities           |
-| D-015 | Concrete skill ranges ("tune live")        | M8          | Deferred | When the battle has positions (M10) to tune against         |
-| D-020 | Respec cost / cooldown                     | M7          | Deferred | If free refunds make builds feel weightless                 |
-| D-021 | Monster stat variance (rng roll)           | M9          | Deferred | When fights feel too uniform / need per-spawn spread        |
-| D-016 | Battle visuals / formation UI / juice      | M10         | Deferred | When the battle needs a real-time view & polish             |     | D-017 | Paid-revive cost balancing | M12 | Deferred | When the revive economy needs real pricing/tuning |     | D-022 | Per-unit / stat-driven movement speed | M10 | Deferred | When unit speed should differ (ranged kiting, haste) |
-| D-023 | Buff / debuff skills applied in-battle     | M10         | Deferred | When combatants can carry dynamic modifier sources          |
-| D-024 | XP → level curve balancing                 | M11         | Deferred | When leveling pace needs tuning against content             |
-| D-025 | Per-difficulty extra elements              | M11         | Deferred | When hard should add elements (e.g. act 2 → cold)           |
-| D-026 | Gold scaling / balance curve               | M13         | Deferred | When rune buffs (M18) + stage spread allow real tuning      |
-| D-027 | Type-2/3 sockets & Immortal/Mythical tiers | M16         | Deferred | When the Rarity union expands past Legendary                |
-| D-028 | Engraving 50/50 dual-stat roll             | M16         | Deferred | When engraving needs its random-of-two-stats depth          |
-| D-029 | Full material catalogue                    | M16         | Deferred | When content/balancing needs the complete gem table         |
+| ID    | Title                                      | Deferred in | Status   | Revisit trigger (short)                                      |
+| ----- | ------------------------------------------ | ----------- | -------- | ------------------------------------------------------------ | --- | ----- | -------------------------- | --- | -------- | ------------------------------------------------- | --- | ----- | ------------------------------------- | --- | -------- | ---------------------------------------------------- |
+| D-001 | Affix system (prefixes/suffixes)           | M5          | Deferred | After combat makes loot quality matter                       |
+| D-002 | Modifier value _ranges_ (min–max)          | M5          | Resolved | Resolved in M16 (material rolls draw within a min–max band)  |
+| D-003 | Multiple modifiers per item                | M5          | Resolved | Resolved in M16 (sockets stack materials on one item)        |
+| D-004 | Named / unique items & crafting            | M5          | Deferred | After affixes; needs a baseline of item depth                |
+| D-005 | Drop tables / loot sources                 | M5          | Resolved | Resolved in M14 (drop tables + chests)                       |
+| D-006 | Consumable generation                      | M5          | Deferred | When consumables need variety beyond seed set                |
+| D-007 | Persistence (save / load)                  | M5          | Deferred | When losing state between sessions becomes painful           |
+| D-008 | XP / leveling system                       | pre-M6      | Resolved | Level curve M7; kills award XP (split) M11 (D-024 tunes)     |
+| D-009 | Enemy / monster system                     | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                         |
+| D-010 | Stat cache / memoization                   | M1          | Deferred | Only if profiling shows getStat() is a hotspot               |
+| D-011 | Skills as class-gated buffs                | M3          | Resolved | Built in M8 (`src/domain/skills/`)                           |
+| D-012 | Advanced on-hit effects                    | M6          | Deferred | When gear/skills need regen, leech, per-hit effects          |
+| D-013 | Additional classes beyond Knight           | M7          | Deferred | When a second class / class-select UI is wanted              |
+| D-014 | Enemy skill-casting                        | M8          | Deferred | When monsters need fireball / cold-bolt abilities            |
+| D-015 | Concrete skill ranges ("tune live")        | M8          | Deferred | When the battle has positions (M10) to tune against          |
+| D-020 | Respec cost / cooldown                     | M7          | Deferred | If free refunds make builds feel weightless                  |
+| D-021 | Monster stat variance (rng roll)           | M9          | Deferred | When fights feel too uniform / need per-spawn spread         |
+| D-016 | Battle visuals / formation UI / juice      | M10         | Deferred | When the battle needs a real-time view & polish              |     | D-017 | Paid-revive cost balancing | M12 | Deferred | When the revive economy needs real pricing/tuning |     | D-022 | Per-unit / stat-driven movement speed | M10 | Deferred | When unit speed should differ (ranged kiting, haste) |
+| D-023 | Buff / debuff skills applied in-battle     | M10         | Deferred | When combatants can carry dynamic modifier sources           |
+| D-024 | XP → level curve balancing                 | M11         | Deferred | When leveling pace needs tuning against content              |
+| D-025 | Per-difficulty extra elements              | M11         | Deferred | When hard should add elements (e.g. act 2 → cold)            |
+| D-026 | Gold scaling / balance curve               | M13         | Deferred | When rune buffs (M18) + stage spread allow real tuning       |
+| D-027 | Type-2/3 sockets & Immortal/Mythical tiers | M16         | Deferred | When the Rarity union expands past Legendary                 |
+| D-028 | Engraving 50/50 dual-stat roll             | M16         | Deferred | When engraving needs its random-of-two-stats depth           |
+| D-029 | Full material catalogue                    | M16         | Deferred | When content/balancing needs the complete gem table          |
+| D-018 | Cube crafting / offering / etc. operations | M17         | Deferred | When item depth needs craft/offer/decorate/engrave/inscribe  |
+| D-030 | Cube gold/EXP weighting & curve tuning     | M17         | Deferred | When the cube economy needs material/gear weighting + tuning |
 
 ---
 
@@ -359,6 +361,37 @@
   content/balancing work, not engine work.
 - **Revisit trigger:** When the cube (M17) + drops surface real material variety to players.
 - **Related:** `MATERIALS` in [src/domain/items/material.ts](../src/domain/items/material.ts).
+
+### D-018 — Cube crafting / offering / decoration / engraving / inscription / extraction
+
+- **What:** The cube operations beyond synthesis + alchemy: **crafting** (misc → equipment),
+  **offering**, **decoration / engraving / inscription** (apply materials into M16 sockets via the
+  cube) and **extraction** (remove a socketed material). Their unlock levels & gold costs are
+  encoded as data (`CUBE_OPERATIONS`) so unlock-gating is testable, but the operations themselves
+  do nothing yet.
+- **Why deferred (M17):** M17 ships the three foundational pieces — synthesis (recycle), alchemy
+  (sell), and cube leveling (EXP → level → unlocks). The remaining ops are content/depth that lean
+  on the M16 socket machinery (`applyMaterial`/`extract`) and a material inventory; wiring them now
+  would outrun the loot/material economy.
+- **Revisit trigger:** When players have material variety (D-029) and want to socket/extract via the
+  cube, or craft equipment from misc drops.
+- **Related:** `CUBE_OPERATIONS` / `isOperationUnlocked` in [src/domain/cube/cube-exp.ts](../src/domain/cube/cube-exp.ts);
+  `applyMaterial` / `extract` in [src/domain/items/socket.ts](../src/domain/items/socket.ts).
+
+### D-030 — Cube gold/EXP weighting & curve tuning
+
+- **What:** The finer cube economy knobs: the **material (×12) item-type** factor for EXP & gold,
+  **per-gear-type alchemy gold** weighting (cube.md gives amulet ×4 … boots ×0.7 for EXP — gold
+  reuses the same factors), a **fine-grained per-level** cube-EXP threshold curve (only cube.md's
+  sparse anchors are encoded), and tuning of the `levelMatch` falloff.
+- **Why deferred (M17):** M17 hits the overview/cube.md anchors exactly (L1 Common = 10g, L10
+  Legendary = 6750g; Common L1 = 2 EXP, L5 = 20) with grade × level × gear-type × level-match. The
+  remaining weightings are content/balance, not engine — gold currently ignores gear type, EXP
+  treats every item as gear (×1), and `cubeLevelForExp` snaps to the nearest documented anchor.
+- **Revisit trigger:** When materials become sellable/meltable, or the cube-leveling pace and
+  per-slot melt values need balancing against the loot economy.
+- **Related:** `sellValue` in [src/domain/cube/alchemy.ts](../src/domain/cube/alchemy.ts);
+  `cubeExpForItem` / `cubeLevelForExp` in [src/domain/cube/cube-exp.ts](../src/domain/cube/cube-exp.ts).
 
 ---
 

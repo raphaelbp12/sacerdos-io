@@ -3,6 +3,7 @@
 exports[`generateItem > headline acceptance test > seed 42 itemLevel 5: deterministic full Item snapshot 1`] = `
 {
   "id": "leather-boots-702760",
+  "itemLevel": 5,
   "kind": "equippable",
   "levelReq": 1,
   "modifiers": [

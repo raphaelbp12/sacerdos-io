@@ -5,6 +5,7 @@ export type { EquipmentSlot } from "./equipment-slot";
 export { EQUIPMENT_SLOTS } from "./equipment-slot";
 
 export type { ItemKind, Item } from "./item";
+export { itemLevelOf } from "./item-level";
 
 export { Equipment } from "./equipment";
 export { Inventory } from "./inventory";

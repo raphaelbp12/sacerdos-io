@@ -48,7 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M16 — Item modifiers / gems** (done). Next up: ⬜ **M17 — Cube system**.
+**Current focus:** ✅ **M17 — Cube system** (done). Next up: ⬜ **M18 — Runes tree**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -68,7 +68,7 @@ Do this, in order:
 | M14 | Drop tables & chests                     | C     | ✅     | ✅    | D-005         |
 | M15 | Inventory & stash capacity               | C     | ✅     | ✅    | —             |
 | M16 | Item modifiers / gems                    | D     | ✅     | ✅    | D-001/002/003 |
-| M17 | Cube system                              | D     | ⬜     | ⬜    | —             |
+| M17 | Cube system                              | D     | ✅     | ✅    | —             |
 | M18 | Runes tree                               | D     | ⬜     | ⬜    | —             |
 | M19 | Groups & roster                          | E     | ⬜     | ⬜    | —             |
 | M20 | Persistence (save / load)                | E     | ⬜     | ⬜    | D-007         |
@@ -506,6 +506,32 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-22 — M17 Cube system (complete)
+
+- **Did:** added the pure-domain `src/domain/cube/` module TDD-first (imports `items` + `rng`;
+  nothing inner imports it) plus made **item level** a first-class field. `item.ts` gained optional
+  `itemLevel?`; `generateItem` now records it; new `items/item-level.ts` `itemLevelOf(item) =
+item.itemLevel ?? item.levelReq` (exported). Cube files: `threshold.ts` (`THRESHOLDS` 1–10/10–15/
+  15–30/30–40/50–60 + `withinThreshold`); `synthesis.ts` (`synthesize(rng, items, {threshold,
+ratio?})` → discriminated result; 3-of-same-rarity-equip → 1 **fresh** next-rarity roll via
+  `generateItem`; rejects wrong-count / mixed-rarity / mixed-kind / non-equippable / max-rarity /
+  out-of-threshold; `SYNTHESIS_RATIO=3`); `alchemy.ts` (`sellValue = ⌊10 × gradeFactor × levelFactor⌋`,
+  grade `1·3·9·18·27`, level piecewise-linear through overview anchors {1→1,10→25,15→88} → **L1
+  Common=10g, L10 Legendary=6750g**); `cube-exp.ts` (`cubeExpForItem` = ⌊grade × itemLvFactor ×
+  gearType × itemType × levelMatch × (1+bonus)⌋, grade `2·6·18·54·162`, cube.md item-level table,
+  slot gear-type factors, gap-based `levelMatch`; `CUBE_EXP_THRESHOLDS` sparse anchors +
+  `cubeLevelForExp`; `CUBE_OPERATIONS` + `isOperationUnlocked`). Snapshot updated (now carries
+  `itemLevel`). **418 tests green (+29); typecheck + lint + build pass.**
+- **Tracker change:** M17 ⬜→✅ (Status + Tests); plan: `docs/milestone-17-cube-plan.md`.
+- **Deferrals:** appended **D-018** (cube crafting/offering/decoration/engraving/inscription/
+  extraction — listed as data for unlock-gating, behavior unimplemented) and **D-030** (material
+  ×12 item-type EXP/gold, per-gear-type alchemy gold, fine-grained per-level cube-EXP curve,
+  `levelMatch` tuning).
+- **Next action:** start **M18 — Runes tree**: author `docs/milestone-18-*.md`; `rune-node.ts` +
+  `RUNE_TREE` data; `RuneState` implements `ModifierSource` for stat nodes and exposes typed getters
+  for non-stat perks (inventory cap, stash tabs, respawn reduction, drop/gold/exp gains); cost scales
+  with branch depth & level; then wire perks into the M12/M13/M14/M15/M17 hooks.
 
 ### 2026-06-22 — M16 Item modifiers / gems (complete)
 

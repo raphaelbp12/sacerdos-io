@@ -55,6 +55,7 @@ export function generateItem(rng: Rng, opts: GenerateOptions): Item {
     kind: "equippable",
     rarity,
     levelReq: base.minLevel,
+    itemLevel,
     slot: base.slot,
     modifiers: [{ attribute, kind: "flat", value: baseValue }],
   };
