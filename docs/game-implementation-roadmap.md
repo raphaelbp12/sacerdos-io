@@ -48,7 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M17 — Cube system** (done). Next up: ⬜ **M18 — Runes tree**.
+**Current focus:** ✅ **M18 — Runes tree** (done). Next up: ⬜ **M19 — Groups & roster**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -69,7 +69,7 @@ Do this, in order:
 | M15 | Inventory & stash capacity               | C     | ✅     | ✅    | —             |
 | M16 | Item modifiers / gems                    | D     | ✅     | ✅    | D-001/002/003 |
 | M17 | Cube system                              | D     | ✅     | ✅    | —             |
-| M18 | Runes tree                               | D     | ⬜     | ⬜    | —             |
+| M18 | Runes tree                               | D     | ✅     | ✅    | —             |
 | M19 | Groups & roster                          | E     | ⬜     | ⬜    | —             |
 | M20 | Persistence (save / load)                | E     | ⬜     | ⬜    | D-007         |
 | M21 | Idle / offline progress                  | E     | ⬜     | ⬜    | —             |
@@ -506,6 +506,30 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-22 — M18 Runes tree (complete)
+
+- **Did:** added the pure-domain `src/domain/runes/` module TDD-first (imports `stats` only;
+  nothing inner imports it; hook adapters return objects that **structurally** match each
+  consumer's param so runes stays decoupled from economy/revive/loot/cube). `rune-node.ts`:
+  `RunePerk` (16 non-stat perks), `RuneEffect` (discriminated `stat | perk`), `RuneNode`
+  (id/label/branch/depth/maxLevel/baseCost/effect), `runeCostAt(node, currentLevel) = ⌊baseCost
+× 1.5^depth × (currentLevel+1)⌋` (`RUNE_DEPTH_GROWTH=1.5`; strictly ↑ in depth & level; throws
+  out-of-range). `rune-tree.ts`: `RUNE_TREE` data — 1 root → 2 mid branches → 6 themed branches
+  (stats/exp/drops/gold/inventory/QoL), 23 nodes covering every perk. `rune-state.ts`: `RuneState`
+  `implements ModifierSource` (`getModifiers` emits stat nodes × level), `buy`/`costToBuy`/`isMaxed`/
+  `levelOf`/`perkValue`, and structural hook adapters `goldModifiersFor("monster"|"boss")`,
+  `respawnReduction()`, `cubeExpOptions()`, `inventoryCapacity/chestCapacity/stashTabCount(base)`,
+  `dropChanceBonus()`, `skill/hero/groupSlots(base)`. Wiring tests drive the **real** hooks
+  (`goldForKill`, `effectiveRespawnMs`, `cubeExpForItem`, `new Inventory`, `new ChestInventory`).
+  **439 tests green (+21); typecheck + lint + build pass.**
+- **Tracker change:** M18 ⬜→✅ (Status + Tests); plan: `docs/milestone-18-runes-plan.md`.
+- **Deferrals:** appended **D-031** (rune cost/value balancing — baseCost/maxLevel/perLevel/
+  DEPTH_GROWTH placeholders), **D-032** (UI node reveal/adjacency graph), **D-033** (wiring perks
+  into systems lacking a hook today: XP `xpForKill`, skill/hero/group slot consumers, offline window).
+- **Next action:** start **M19 — Groups & roster**: author `docs/milestone-19-*.md`; `roster.ts`
+  (owned characters) + `group.ts` (ordered formation feeding M10's battlefield); slot caps read
+  `RuneState.heroSlots/groupSlots`; formation order drives battle positions.
 
 ### 2026-06-22 — M17 Cube system (complete)
 

@@ -393,6 +393,45 @@
 - **Related:** `sellValue` in [src/domain/cube/alchemy.ts](../src/domain/cube/alchemy.ts);
   `cubeExpForItem` / `cubeLevelForExp` in [src/domain/cube/cube-exp.ts](../src/domain/cube/cube-exp.ts).
 
+### D-031 — Rune cost / value balancing
+
+- **What:** Every tuning knob on the rune tree: per-node `baseCost`, `maxLevel`, `perLevel`
+  value, and the global `RUNE_DEPTH_GROWTH` (1.5) cost multiplier. All current numbers are
+  placeholders chosen only to satisfy the structural laws (cost strictly rises with depth and
+  level).
+- **Why deferred (M18):** M18 ships the rune _engine_ — the tree shape, the cost function shape,
+  the stat `ModifierSource`, and the perk adapters. Picking real numbers needs a gold-income curve
+  (which stage/source pays what over time) that does not exist yet.
+- **Revisit trigger:** When a gold-income curve exists (post-economy balancing) and rune purchases
+  need to feel paced against farming.
+- **Related:** `RUNE_TREE` in [src/domain/runes/rune-tree.ts](../src/domain/runes/rune-tree.ts);
+  `runeCostAt` / `RUNE_DEPTH_GROWTH` in [src/domain/runes/rune-node.ts](../src/domain/runes/rune-node.ts).
+
+### D-032 — Rune tree UI reveal / adjacency graph
+
+- **What:** The discovery graph — which nodes are visible/adjacent to a purchased node (overview:
+  "unlocking one node, it will show the adjacent nodes"). The domain stores each node's `branch`
+  and `depth`; it does **not** model parent/child edges, because purchases have no prerequisites.
+- **Why deferred (M18):** Revealing nodes is pure presentation; gating purchases on it would
+  contradict the overview's "no pre-requisites." The metadata needed to render the graph is
+  present, but laying out and animating the tree is the outer shell's job.
+- **Revisit trigger:** When the rune tree gets a UI screen.
+- **Related:** `RuneNode.branch` / `RuneNode.depth` in [src/domain/runes/rune-node.ts](../src/domain/runes/rune-node.ts).
+
+### D-033 — Wiring rune perks into systems that lack a hook today
+
+- **What:** Three perk families are exposed by `RuneState` but not yet consumed: **XP** perks
+  (`xpForKill` has no modifier param), the **slot** perks (`skillSlots` / `heroSlots` /
+  `groupSlots` — no slot consumers until M19), and any **offline-window** perk (M21). The values
+  are summable and tested now; their consumers adopt them when those systems gain the hook.
+- **Why deferred (M18):** M18's named hooks (gold, drops, inventory cap, respawn, cube EXP) are
+  wired end-to-end against the real functions. The remaining consumers either don't exist yet
+  (slots → M19, offline → M21) or have no modifier parameter to thread through (`xpForKill`).
+- **Revisit trigger:** M19 (slots), M21 (offline), or whenever `xpForKill` grows an exp-modifier
+  parameter mirroring `goldForKill`.
+- **Related:** `expPercent` / slot getters in [src/domain/runes/rune-state.ts](../src/domain/runes/rune-state.ts);
+  `xpForKill` in [src/domain/stages/xp.ts](../src/domain/stages/xp.ts).
+
 ---
 
 > _Last updated: keep this line current when appending — but never rewrite past entries._
