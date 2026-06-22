@@ -34,7 +34,13 @@ import type { Rng } from "../domain/rng";
 import type { Stat } from "../domain/stats";
 import { STATS } from "../domain/stats";
 import type { Item, EquipmentSlot } from "../domain/items";
-import { Inventory, Stash, Equipment, EQUIPMENT_SLOTS } from "../domain/items";
+import {
+  Inventory,
+  Stash,
+  Equipment,
+  EQUIPMENT_SLOTS,
+  generateItem,
+} from "../domain/items";
 import { Wallet } from "../domain/economy";
 import { goldForKill } from "../domain/economy";
 import type { GoldSource } from "../domain/economy";
@@ -58,6 +64,7 @@ import {
   retreat,
 } from "../domain/stages";
 import type { StagePosition } from "../domain/stages";
+import type { Difficulty } from "../domain/stages";
 import { synthesize as synthesizeItems, sellValue } from "../domain/cube";
 import type { SynthesisResult, Threshold } from "../domain/cube";
 import { firstChest, openChest as drawChestItem } from "../domain/loot";
@@ -99,7 +106,7 @@ export class GameSession {
   declare private readonly inventory: Inventory;
   declare private readonly stash: Stash;
   declare private characters: SavedCharacter[];
-  declare private groups: SavedGroup[];
+  declare private groups_: SavedGroup[];
   declare private heroSlots: number;
   declare private groupSlots: number;
   private readonly chests: Chest[] = [];
@@ -114,7 +121,7 @@ export class GameSession {
     this.inventory = state.inventory;
     this.stash = state.stash;
     this.characters = [...state.characters];
-    this.groups = [...state.groups];
+    this.groups_ = [...state.groups];
     this.heroSlots = state.heroSlots;
     this.groupSlots = state.groupSlots;
   }
@@ -129,7 +136,7 @@ export class GameSession {
       inventory: this.inventory,
       stash: this.stash,
       characters: this.characters,
-      groups: this.groups,
+      groups: this.groups_,
       heroSlots: this.heroSlots,
       groupSlots: this.groupSlots,
     };
@@ -155,6 +162,26 @@ export class GameSession {
 
   get pendingChests(): readonly Chest[] {
     return this.chests;
+  }
+
+  /** The active difficulty (drives monster / item level). */
+  get difficulty(): Difficulty {
+    return this.progression.difficulty;
+  }
+
+  /** The owned groups (read-only recipes; formation order drives battle position). */
+  get groups(): readonly SavedGroup[] {
+    return this.groups_;
+  }
+
+  /** Total inventory slot capacity (placeholder; rune-wired later — D-039). */
+  get inventoryCapacity(): number {
+    return this.inventory.capacity;
+  }
+
+  /** A character's saved recipe (class / level / build / equipment) for display. */
+  character(charId: string): SavedCharacter {
+    return this.requireCharacter(charId);
   }
 
   /** Final stats of a character, rehydrated from its recipe (compute-don't-store). */
@@ -186,6 +213,13 @@ export class GameSession {
   /** Add gold to the wallet (dev / reward helper). */
   addGold(amount: number): void {
     this.wallet.add(amount);
+  }
+
+  /** Generate a random item into the inventory (dev helper); returns it, or
+   * `undefined` when the bag is full. Uses the injected `Rng` (deterministic). */
+  grantRandomItem(itemLevel = 1): Item | undefined {
+    const item = generateItem(this.rng, { itemLevel });
+    return this.inventory.add(item) ? item : undefined;
   }
 
   // ── character actions ─────────────────────────────────────────────────────────

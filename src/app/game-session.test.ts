@@ -286,6 +286,45 @@ describe("GameSession — persistence + offline", () => {
   });
 });
 
+// ── UI read accessors (the seam the shell renders) ────────────────────────────
+
+describe("GameSession — UI read accessors", () => {
+  it("exposes a character recipe (class / level / build / equipment)", () => {
+    const session = createInitialGame(new SeededRng(1));
+    const hero = session.character("hero-1");
+    expect(hero.classId).toBe("knight");
+    expect(hero.level).toBe(1);
+    expect(hero.build).toEqual({});
+    expect(hero.equipment).toEqual({});
+  });
+
+  it("reflects allocations in the character recipe's build", () => {
+    const session = createInitialGame(new SeededRng(1));
+    session.allocate("hero-1", "attack");
+    expect(session.character("hero-1").build).toEqual({ attack: 1 });
+  });
+
+  it("throws for an unknown character id", () => {
+    const session = createInitialGame(new SeededRng(1));
+    expect(() => session.character("nobody")).toThrow();
+  });
+
+  it("exposes difficulty, groups and inventory capacity", () => {
+    const session = createInitialGame(new SeededRng(1));
+    expect(session.difficulty).toBe("normal");
+    expect(session.groups.map((g) => g.id)).toEqual(["group-1"]);
+    expect(session.inventoryCapacity).toBe(40);
+  });
+
+  it("grants a freshly generated item to the inventory (dev helper)", () => {
+    const session = createInitialGame(new SeededRng(1));
+    const item = session.grantRandomItem(5);
+    expect(item).toBeDefined();
+    expect(session.inventoryItems).toContain(item);
+    expect(item?.itemLevel).toBe(5);
+  });
+});
+
 // keep the imported constant referenced (guards against accidental removal)
 it("exposes the starter weapon base id", () => {
   expect(STARTER_WEAPON_BASE_ID).toBe("short-sword");
