@@ -5,6 +5,7 @@ export {
   Monster,
   scaleMonster,
   scaleBoss,
-  BOSS_STAT_MULTIPLIER,
+  BOSS_HP_MULTIPLIER,
+  BOSS_DAMAGE_MULTIPLIER,
 } from "./scale-monster";
 export type { ScaleMonsterOptions } from "./scale-monster";

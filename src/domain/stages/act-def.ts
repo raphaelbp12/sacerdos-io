@@ -95,7 +95,7 @@ export const ACTS: readonly ActDef[] = [
     allowedElements: ["physical"],
     weakMonsterId: "goblin-grunt",
     strongMonsterId: "orc-brute",
-    stageBossId: "ogre-warlord",
+    stageBossId: "goblin-grunt",
     actBossId: "ogre-warlord",
     baseLevel: 1,
     baseGoldPerMonster: 1,

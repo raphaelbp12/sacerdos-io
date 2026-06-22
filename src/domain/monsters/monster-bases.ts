@@ -16,7 +16,7 @@ export const MONSTER_BASES: readonly MonsterDef[] = [
   {
     id: "goblin-grunt",
     name: "Goblin Grunt",
-    baseStats: { hp: 30, attack: 5, armor: 2, flatDamage: 3 },
+    baseStats: { hp: 30, attack: 5, armor: 2, flatDamage: 2 },
     perLevelGains: { hp: 8, attack: 1, armor: 1, flatDamage: 1 },
     preferredElement: "physical",
   },

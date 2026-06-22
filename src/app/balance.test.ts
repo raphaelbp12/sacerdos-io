@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import { GameSession } from "./game-session";
+import { STARTER_WEAPON } from "./game-session";
 import type { GameState, SavedCharacter, SavedGroup } from "../persistence";
 import { Wallet } from "../domain/economy";
 import { RuneState } from "../domain/runes";
@@ -141,66 +142,61 @@ describe.skip("balance map (exploratory)", () => {
   });
 });
 
-// ── progression-gate spec: the curve must have teeth, and upgrades must matter ─
+// ── progression-gate spec: the intended act-1 onboarding curve (D-041) ─────────
 //
-// This is the reusable balance guardrail. Each `it` pins a *gate*: a tier that
-// cannot clear a stage, and the next investment that can. If a future change
-// flattens the curve (every stage trivially clears) or breaks it (no tier
-// clears), one of these flips and the build fails loudly.
+// The reusable balance guardrail. It encodes the *designed* curve as data: each
+// tier clears its target stage but is **walled** at the next, and the next
+// investment breaks through. If a future change flattens the curve (everything
+// trivially clears) or breaks it (a tier stops clearing), one of these flips and
+// the build fails loudly. Tiers mirror a real player's progression:
+//
+//   T0  the starter loadout (Worn Short Sword)      → clears 1-1, walled at 1-2
+//   T1  a found weapon + a couple of levels/skills  → clears 1-2, walled at 1-3
+//   T2  more levels + survivability skills          → clears 1-3
+//
+// (Why a weapon at all: damage is `attack × physicalDamage × …`, so a barehanded
+//  hero deals zero damage and cannot clear any stage — see the first test.)
 
-const STRONG_WEAPON = weapon("balance-strong-weapon", 50, 30);
-const MID_TIER: PowerTier = {
+/** A modest found upgrade: a single-stat `physicalDamage` weapon (uncommon-ish). */
+const FOUND_BLADE = weapon("found-blade", 0, 10);
+
+const T0_STARTER: PowerTier = { weapon: STARTER_WEAPON };
+const T1_GEARED: PowerTier = {
+  level: 3,
+  weapon: FOUND_BLADE,
+  build: { attack: 2, hp: 1 },
+};
+const T2_SKILLED: PowerTier = {
   level: 5,
-  weapon: weapon("balance-mid-weapon", 30, 20),
-  build: { attack: 3, hp: 2 },
+  weapon: FOUND_BLADE,
+  build: { attack: 1, hp: 4 },
 };
 
-describe("act-1 progression gates (current balance)", () => {
-  it("gate 1 — clearing stage 1 requires gear (the bare starter is walled)", () => {
-    // A brand-new L1 Knight with no weapon cannot clear 1-1...
+describe("act-1 onboarding curve", () => {
+  it("a barehanded hero deals zero damage and clears nothing", () => {
+    // Design law, not a bug: with no weapon `physicalDamage` is 0, so every hit
+    // is 0. This is why the starter ships with a weapon.
     expect(clearRate({}, 1, 1)).toBe(0);
-    // ...but a strong weapon takes it down reliably across every seed.
-    expect(clearRate({ weapon: STRONG_WEAPON }, 1, 1)).toBe(1);
   });
 
-  it("gate 2 — stage 2 demands more than one weapon (needs levels + skills)", () => {
-    // The weapon that cleared 1-1 is not enough for 1-2...
-    expect(clearRate({ weapon: STRONG_WEAPON }, 1, 2)).toBe(0);
-    // ...but a leveled, skilled, geared hero clears it reliably.
-    expect(clearRate(MID_TIER, 1, 2)).toBe(1);
+  it("step 1 — the starter loadout clears stage 1, but is walled at stage 2", () => {
+    expect(clearRate(T0_STARTER, 1, 1)).toBe(1);
+    expect(clearRate(T0_STARTER, 1, 2)).toBe(0);
   });
 
-  it("gate 3 — the curve keeps demanding more (stage 3 still walls the mid tier)", () => {
-    // Proves the ramp doesn't plateau: 1-3 needs investment beyond the mid tier.
-    expect(clearRate(MID_TIER, 1, 3)).toBe(0);
-  });
-});
-
-// ── INTENDED onboarding curve (target balance — see D-041) ────────────────────
-//
-// This is the curve described by design: a brand-new hero clears stage 1 from
-// scratch, a dropped item unlocks stage 2, and skills unlock stage 3. The game
-// does NOT meet this yet (the starter can't clear 1-1 — see the gate-1 test),
-// so this block is skipped. Un-skip it once act-1 entry tuning lands; it then
-// becomes the guardrail for the intended player experience.
-
-describe.skip("INTENDED onboarding curve (target — D-041)", () => {
-  const FOUND_ITEM = weapon("starter-drop", 20, 10);
-  const WITH_SKILLS: PowerTier = {
-    level: 3,
-    weapon: FOUND_ITEM,
-    build: { attack: 2, hp: 1 },
-  };
-
-  it("a brand-new L1 Knight clears stage 1-1 from scratch", () => {
-    expect(clearRate({}, 1, 1)).toBe(1);
+  it("a better weapon alone does NOT skip ahead — leveling is required", () => {
+    // A fresh L1 hero who finds a stronger blade still can't clear stage 2: gear
+    // is not a substitute for levels, so an early rare drop never trivialises the
+    // act. The wall moves only when the hero levels up (see step 2).
+    expect(clearRate({ weapon: FOUND_BLADE }, 1, 2)).toBe(0);
   });
 
-  it("after finding an item, the player clears stage 1-2", () => {
-    expect(clearRate({ weapon: FOUND_ITEM }, 1, 2)).toBe(1);
+  it("step 2 — after finding a weapon (+ a few levels), the hero clears stage 2, but is walled at stage 3", () => {
+    expect(clearRate(T1_GEARED, 1, 2)).toBe(1);
+    expect(clearRate(T1_GEARED, 1, 3)).toBe(0);
   });
 
-  it("after spending skill points, the player clears stage 1-3", () => {
-    expect(clearRate(WITH_SKILLS, 1, 3)).toBe(1);
+  it("step 3 — after more levels + survivability skills, the hero clears stage 3", () => {
+    expect(clearRate(T2_SKILLED, 1, 3)).toBe(1);
   });
 });

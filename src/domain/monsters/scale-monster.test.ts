@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { SeededRng } from "../rng";
 import { resolveAttack } from "../combat";
 import {
-  BOSS_STAT_MULTIPLIER,
+  BOSS_HP_MULTIPLIER,
+  BOSS_DAMAGE_MULTIPLIER,
   MONSTER_BASES,
   Monster,
   monsterById,
@@ -103,16 +104,24 @@ describe("scaleMonster — element resolution by allowedElements", () => {
   });
 });
 
-describe("scaleBoss — a normal monster with higher stats (9.2)", () => {
-  it("multiplies stats by BOSS_STAT_MULTIPLIER", () => {
+describe("scaleBoss — a tanky monster with tamed burst (9.2)", () => {
+  it("multiplies defensive stats (hp, armor) by BOSS_HP_MULTIPLIER", () => {
     const normal = scaleMonster(strong, 1, PHYSICAL_ONLY);
     const b = scaleBoss(strong, 1, PHYSICAL_ONLY);
-    expect(b.getStat("hp")).toBe(normal.getStat("hp") * BOSS_STAT_MULTIPLIER);
-    expect(b.getStat("attack")).toBe(
-      normal.getStat("attack") * BOSS_STAT_MULTIPLIER,
-    );
+    expect(b.getStat("hp")).toBe(normal.getStat("hp") * BOSS_HP_MULTIPLIER);
     expect(b.getStat("armor")).toBe(
-      normal.getStat("armor") * BOSS_STAT_MULTIPLIER,
+      normal.getStat("armor") * BOSS_HP_MULTIPLIER,
+    );
+  });
+
+  it("multiplies offensive stats (attack, damage) by the gentler BOSS_DAMAGE_MULTIPLIER", () => {
+    const normal = scaleMonster(strong, 1, PHYSICAL_ONLY);
+    const b = scaleBoss(strong, 1, PHYSICAL_ONLY);
+    expect(b.getStat("attack")).toBe(
+      Math.floor(normal.getStat("attack") * BOSS_DAMAGE_MULTIPLIER),
+    );
+    expect(b.getStat("physicalDamage")).toBe(
+      Math.floor(normal.getStat("physicalDamage") * BOSS_DAMAGE_MULTIPLIER),
     );
   });
 
@@ -120,6 +129,6 @@ describe("scaleBoss — a normal monster with higher stats (9.2)", () => {
     // raw hp at L2 = base + perLevel, multiplied then floored
     const raw = strong.baseStats.hp + strong.perLevelGains.hp * (2 - 1);
     const b = scaleBoss(strong, 2, PHYSICAL_ONLY);
-    expect(b.getStat("hp")).toBe(Math.floor(raw * BOSS_STAT_MULTIPLIER));
+    expect(b.getStat("hp")).toBe(Math.floor(raw * BOSS_HP_MULTIPLIER));
   });
 });

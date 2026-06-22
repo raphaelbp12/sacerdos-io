@@ -4,8 +4,20 @@ import type { Stat } from "../stats";
 import { defaultStat } from "../stats";
 import type { MonsterDef, MonsterStatBlock } from "./monster-def";
 
-/** Boss stat multiplier — "a normal monster with higher stats" (overview). */
-export const BOSS_STAT_MULTIPLIER = 3;
+/**
+ * Boss multipliers — "a normal monster with higher stats" (overview), split into
+ * a **defensive** and an **offensive** factor.
+ *
+ * Damage is multiplicative (`attack × flatDamage`), so a single multiplier applied
+ * to *both* offensive stats squares into the hit (×3 → ×9 damage), which one-shots
+ * a fresh hero and turns every boss into a binary burst race (D-041 follow-up).
+ * Keeping bosses **tanky** (full multiplier on hp/armor) while **taming their
+ * burst** (a gentler multiplier on attack/flatDamage) makes a boss a survivable
+ * damage-sponge a starter-geared hero can out-trade.
+ */
+export const BOSS_HP_MULTIPLIER = 3;
+/** Offensive multiplier (attack + flat damage) — see {@link BOSS_HP_MULTIPLIER}. */
+export const BOSS_DAMAGE_MULTIPLIER = 1.5;
 
 /**
  * A scaled, fightable monster implementing the `Combatant` contract (M6), so it
@@ -67,52 +79,65 @@ function resolveElement(
 }
 
 export interface ScaleMonsterOptions {
-  /** Stat multiplier applied before flooring (bosses pass > 1). Default 1. */
+  /** Defensive multiplier (hp + armor), applied before flooring. Default 1. */
   readonly statMultiplier?: number;
+  /**
+   * Offensive multiplier (attack + flat damage), applied before flooring.
+   * Defaults to `statMultiplier` so normal monsters scale uniformly; bosses
+   * pass a gentler value to avoid the squared-burst one-shot (D-041).
+   */
+  readonly offensiveMultiplier?: number;
 }
 
 /**
  * Scale a monster archetype to a stage's monster `level`.
  *
  * Linear, deterministic (no rng — variance deferred, D-021):
- *   stat(L) = floor((base + perLevel × (L − 1)) × statMultiplier)
+ *   stat(L) = floor((base + perLevel × (L − 1)) × multiplier)
  *
- * The monster's `flatDamage` is routed into the stat for the **resolved**
- * element, so the same archetype deals physical in act 1 and its preferred
- * element once the act allows it.
+ * Defensive stats (hp, armor) use `statMultiplier`; offensive stats (attack,
+ * flatDamage) use `offensiveMultiplier`. The `flatDamage` is routed into the
+ * stat for the **resolved** element, so the same archetype deals physical in
+ * act 1 and its preferred element once the act allows it.
  */
 export function scaleMonster(
   def: MonsterDef,
   level: number,
   allowedElements: readonly DamageElement[],
-  { statMultiplier = 1 }: ScaleMonsterOptions = {},
+  {
+    statMultiplier = 1,
+    offensiveMultiplier = statMultiplier,
+  }: ScaleMonsterOptions = {},
 ): Monster {
   assertValidLevel(level);
 
-  const at = (key: keyof MonsterStatBlock): number =>
+  const at = (key: keyof MonsterStatBlock, multiplier: number): number =>
     Math.floor(
-      (def.baseStats[key] + def.perLevelGains[key] * (level - 1)) *
-        statMultiplier,
+      (def.baseStats[key] + def.perLevelGains[key] * (level - 1)) * multiplier,
     );
 
   const element = resolveElement(def, allowedElements);
   const stats: Partial<Record<Stat, number>> = {
-    hp: at("hp"),
-    attack: at("attack"),
-    armor: at("armor"),
-    [ELEMENT_DAMAGE_STAT[element]]: at("flatDamage"),
+    hp: at("hp", statMultiplier),
+    attack: at("attack", offensiveMultiplier),
+    armor: at("armor", statMultiplier),
+    [ELEMENT_DAMAGE_STAT[element]]: at("flatDamage", offensiveMultiplier),
   };
 
   return new Monster(def.name, stats, element);
 }
 
-/** A boss: a normal monster scaled with `BOSS_STAT_MULTIPLIER` higher stats. */
+/**
+ * A boss: a normal monster made **tanky** (`BOSS_HP_MULTIPLIER` on hp/armor) but
+ * with only **moderately** higher burst (`BOSS_DAMAGE_MULTIPLIER` on offense).
+ */
 export function scaleBoss(
   def: MonsterDef,
   level: number,
   allowedElements: readonly DamageElement[],
 ): Monster {
   return scaleMonster(def, level, allowedElements, {
-    statMultiplier: BOSS_STAT_MULTIPLIER,
+    statMultiplier: BOSS_HP_MULTIPLIER,
+    offensiveMultiplier: BOSS_DAMAGE_MULTIPLIER,
   });
 }

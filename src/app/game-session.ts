@@ -81,6 +81,29 @@ export const STARTER_CLASS_ID = "knight";
 /** The class's guaranteed first-drop weapon base id. */
 export const STARTER_WEAPON_BASE_ID = "short-sword";
 
+/**
+ * The weapon the starter Knight begins equipped with. A barehanded hero deals
+ * **zero** damage (the formula is `attack × physicalDamage × …`, and the base
+ * `physicalDamage` is 0), so a new player must field a weapon to fight at all.
+ *
+ * This is a genuine **Common, level-1** short sword: a single `physicalDamage`
+ * modifier at the level-1 Common floor (`baseValueForLevel(1)` = 5), exactly
+ * what `generateItem` would roll for the lowest-tier weapon. It is deliberately
+ * the weakest functional weapon — it clears stage 1-1 and nothing more, so any
+ * early drop is a real upgrade (it is not a power crutch that lingers into later
+ * stages). See the balance spec and D-041.
+ */
+export const STARTER_WEAPON: Item = {
+  id: "starter-short-sword",
+  name: "Worn Short Sword",
+  rarity: "Common",
+  kind: "equippable",
+  levelReq: 1,
+  itemLevel: 1,
+  slot: "weapon",
+  modifiers: [{ attribute: "physicalDamage", kind: "flat", value: 5 }],
+};
+
 /** Battle-tick granularity used when running a stage to completion. */
 const PLAY_TICK_STEP_MS = 100;
 /** Safety cap so a never-resolving fight can't hang `playStage`. */
@@ -549,7 +572,7 @@ export function createInitialGame(rng: Rng): GameSession {
     classId: STARTER_CLASS_ID,
     level: 1,
     build: {},
-    equipment: {},
+    equipment: { weapon: STARTER_WEAPON },
     attackElement: "physical",
   };
   const group: SavedGroup = {

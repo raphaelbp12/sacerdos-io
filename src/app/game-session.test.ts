@@ -5,6 +5,7 @@ import {
   createInitialGame,
   loadGame,
   STARTER_WEAPON_BASE_ID,
+  STARTER_WEAPON,
 } from "./index";
 
 import type { GameState, SavedCharacter, SavedGroup } from "../persistence";
@@ -89,13 +90,22 @@ describe("GameSession — bootstrap + character", () => {
     expect(session.gold).toBe(0);
     expect(session.inventoryItems).toHaveLength(0);
 
+    // The starter Knight begins equipped with the Worn Short Sword (a barehanded
+    // hero deals zero damage). It is a Common floor sword: +5 physicalDamage and
+    // no attack, so the attack stat stays at the Knight's base 10.
+    expect(session.character("hero-1").equipment.weapon).toEqual(
+      STARTER_WEAPON,
+    );
     const stats = session.statsOf("hero-1");
-    expect(stats.attack).toBe(10); // Knight L1 base attack
+    expect(stats.attack).toBe(10); // Knight L1 base attack (starter adds physicalDamage)
+    expect(stats.physicalDamage).toBe(5); // starter weapon +5 physicalDamage
     expect(stats.hp).toBe(100); // Knight L1 base hp
   });
 
   it("equips a weapon from the inventory and the character's stat rises", () => {
     const session = createInitialGame(new SeededRng(1));
+    // Bare the starter weapon so the equip is an unambiguous rise from base.
+    session.unequip("hero-1", "weapon");
     const sword = weapon("sword-1", 5);
     session.grantItem(sword);
 
@@ -113,7 +123,7 @@ describe("GameSession — bootstrap + character", () => {
     session.grantItem(highReq);
 
     expect(() => session.equip("hero-1", highReq)).toThrow();
-    // nothing changed: item still in the bag, stat untouched
+    // nothing changed: item still in the bag, stat untouched (starter weapon stays)
     expect(session.inventoryItems).toContain(highReq);
     expect(session.statsOf("hero-1").attack).toBe(10);
   });
@@ -123,7 +133,7 @@ describe("GameSession — bootstrap + character", () => {
 
     expect(session.availablePoints("hero-1")).toBe(1);
 
-    session.allocate("hero-1", "attack"); // +2 attack passive
+    session.allocate("hero-1", "attack"); // +2 attack passive (on top of base 10)
     expect(session.statsOf("hero-1").attack).toBe(12);
     expect(session.availablePoints("hero-1")).toBe(0);
 
@@ -295,7 +305,7 @@ describe("GameSession — UI read accessors", () => {
     expect(hero.classId).toBe("knight");
     expect(hero.level).toBe(1);
     expect(hero.build).toEqual({});
-    expect(hero.equipment).toEqual({});
+    expect(hero.equipment).toEqual({ weapon: STARTER_WEAPON });
   });
 
   it("reflects allocations in the character recipe's build", () => {

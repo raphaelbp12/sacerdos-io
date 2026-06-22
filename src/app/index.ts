@@ -15,4 +15,5 @@ export {
   DEFAULT_STASH_TAB_CAPACITY,
   STARTER_CLASS_ID,
   STARTER_WEAPON_BASE_ID,
+  STARTER_WEAPON,
 } from "./game-session";
