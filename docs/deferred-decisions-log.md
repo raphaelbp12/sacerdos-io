@@ -30,7 +30,7 @@
 | D-004 | Named / unique items & crafting            | M5          | Deferred | After affixes; needs a baseline of item depth                |
 | D-005 | Drop tables / loot sources                 | M5          | Resolved | Resolved in M14 (drop tables + chests)                       |
 | D-006 | Consumable generation                      | M5          | Deferred | When consumables need variety beyond seed set                |
-| D-007 | Persistence (save / load)                  | M5          | Deferred | When losing state between sessions becomes painful           |
+| D-007 | Persistence (save / load)                  | M5          | Resolved | Resolved in M20 (`src/persistence/` DTO ↔ domain mapper)     |
 | D-008 | XP / leveling system                       | pre-M6      | Resolved | Level curve M7; kills award XP (split) M11 (D-024 tunes)     |
 | D-009 | Enemy / monster system                     | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                         |
 | D-010 | Stat cache / memoization                   | M1          | Deferred | Only if profiling shows getStat() is a hotspot               |
@@ -53,6 +53,8 @@
 | D-030 | Cube gold/EXP weighting & curve tuning     | M17         | Deferred | When the cube economy needs material/gear weighting + tuning |
 | D-019 | Second currency + character/group shop     | M19         | Deferred | When acquiring characters/groups needs a shop + currency     |
 | D-034 | Per-group formation capacity value         | M19         | Deferred | When formation size needs tuning / a stat or rune source     |
+| D-035 | Save-format migrations across versions     | M20         | Deferred | When a `SAVE_VERSION` bump must read older saves             |
+| D-036 | Save storage adapter + autosave cadence    | M20         | Deferred | When the shell must persist to localStorage / file / cloud   |
 
 ---
 
@@ -134,6 +136,29 @@
   combat results). Persistence is utility, not value, until there's progress worth keeping.
 - **Revisit trigger:** Once XP/leveling (D-008) or combat outcomes make a session's progress
   worth preserving.
+- **Resolved (M20):** `src/persistence/` adds a pure outer-layer mapper — `serialize(GameState)
+→ SaveState` and `deserialize(SaveState) → GameState` — covering progression, wallet, runes,
+  cube level, inventory/stash, and character/group recipes, with `buildRoster`/`buildGroupRoster`
+  rehydrating live combatants through the existing `createCharacter` pipeline. The domain stays
+  pure (nothing under `src/domain/` imports persistence). Round-trip equality is tested. Remaining
+  concerns are split out: cross-version migrations (**D-035**) and the physical storage adapter /
+  autosave (**D-036**).
+
+### D-035 — Save-format migrations across versions
+
+- **What:** An upgrader that reads a save written at an older `SAVE_VERSION` and migrates it to
+  the current shape, instead of `deserialize` rejecting any non-current version outright.
+- **Why deferred (M20):** Only `version = 1` exists, so there is nothing to migrate from. A
+  loud reject on an unknown version is the correct, safe v1 behavior.
+- **Revisit trigger:** The first time `SAVE_VERSION` is bumped while real saves exist in the wild.
+
+### D-036 — Save storage adapter + autosave cadence
+
+- **What:** Where the `SaveState` physically lives (localStorage / file / cloud), when it's
+  written (autosave cadence, on-quit flush), and load-on-boot wiring.
+- **Why deferred (M20):** M20 is the pure DTO ↔ domain mapper only; persistence-to-storage is
+  an outer-shell concern that must not leak into the mapper (keeps it pure and testable).
+- **Revisit trigger:** When the UI shell needs sessions to actually survive a reload.
 
 ### D-008 — XP / leveling system
 

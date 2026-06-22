@@ -48,7 +48,7 @@ Do this, in order:
 > this doc is detail; this table is the dashboard. `Tests` = the milestone's acceptance tests
 > are green under `npm run test`.
 
-**Current focus:** ✅ **M19 — Groups & roster** (done). Next up: ⬜ **M20 — Persistence (save / load)**.
+**Current focus:** ✅ **M20 — Persistence (save / load)** (done). Next up: ⬜ **M21 — Idle / offline progress**.
 
 | #   | Milestone                                | Phase | Status | Tests | Resolves      |
 | --- | ---------------------------------------- | ----- | ------ | ----- | ------------- |
@@ -71,7 +71,7 @@ Do this, in order:
 | M17 | Cube system                              | D     | ✅     | ✅    | —             |
 | M18 | Runes tree                               | D     | ✅     | ✅    | —             |
 | M19 | Groups & roster                          | E     | ✅     | ✅    | —             |
-| M20 | Persistence (save / load)                | E     | ⬜     | ⬜    | D-007         |
+| M20 | Persistence (save / load)                | E     | ✅     | ✅    | D-007         |
 | M21 | Idle / offline progress                  | E     | ⬜     | ⬜    | —             |
 
 > **Granularity rule.** This table tracks **milestone-level** status. When a milestone starts,
@@ -506,6 +506,36 @@ When each milestone begins, append these to [deferred-decisions-log.md](deferred
 ```
 
 <!-- Newest entries on top -->
+
+### 2026-06-22 — M20 Persistence (save / load) (complete)
+
+- **Did:** added the **outer-layer** `src/persistence/` module TDD-first (imports the domain
+  barrels; **nothing under `src/domain/` imports it** — domain stays pure). `save-state.ts`:
+  `SAVE_VERSION = 1`, the JSON-safe `SaveState` DTO tree, and the live `GameState` aggregate the
+  shell owns (`{ progression, wallet, runes, cubeLevel, inventory, stash, characters, groups,
+heroSlots, groupSlots }`). Characters persist as **recipes** (`SavedCharacter = { id, name,
+classId, level, build, equipment, skills?, attackElement? }`) — never a live `Combatant`;
+  groups as `{ id, capacity, formation }`. `serialize.ts`: `serialize(state) → SaveState`
+  (wallet balance, **sparse** rune levels via `levelOf` over `RUNE_TREE`, inventory/stash with
+  `Infinity`↔`null` capacity encoding, items copied verbatim since `Item` is already pure data)
+  and `deserialize(save) → GameState` (rebuild `Wallet`; replay `RuneState.buy` / `Inventory.add`
+  / `Stash` tab adds; **reject unknown `version`**). `buildMember`/`buildRoster`/`buildGroupRoster`
+  rehydrate live combatants through the existing `createCharacter` + `Equipment.equip` +
+  `asCombatant` pipeline (replaying `Build.spend`, `skillById` for skills) — compute-don't-store,
+  DRY. Round-trip test: `serialize(deserialize(JSON.parse(JSON.stringify(serialize(state)))))`
+  deep-equals the original; rebuilt wallet/runes/inventory/stash + a rehydrated member's
+  `getStat("hp"/"attack")` and formation order all verified. **468 tests green (+9); typecheck +
+  lint + build pass.**
+- **Tracker change:** M20 ⬜→✅ (Status + Tests); plan: `docs/milestone-20-persistence-plan.md`.
+  Resolved **D-007**.
+- **Deferrals:** appended **D-035** (save-format migrations across `SAVE_VERSION` bumps — only v1
+  read today) and **D-036** (physical storage adapter / autosave cadence — the mapper is pure;
+  storage is the shell's job).
+- **Next action:** start **M21 — Idle / offline progress**: author `docs/milestone-21-*.md`;
+  `offline.ts` `simulateElapsed(state, deltaMs)` fast-forwarding farming on the current stage via
+  the **same `Clock`/battle tick** (no parallel sim — DRY), batching kills into gold + xp + chest
+  rolls, capped by inventory space and an offline ceiling; deterministic rewards under a fixed
+  elapsed time + seed.
 
 ### 2026-06-22 — M19 Groups & roster (complete)
 
