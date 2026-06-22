@@ -57,6 +57,7 @@
 | D-036 | Save storage adapter + autosave cadence    | M20         | Deferred | When the shell must persist to localStorage / file / cloud   |
 | D-037 | Applying offline XP to characters          | M21         | Deferred | When `SavedCharacter` gains a `totalXp` / progression field  |
 | D-038 | Offline fidelity / batching + window perk  | M21         | Deferred | When idle accuracy/perf matter (closed-form kills/sec)       |
+| D-039 | `GameSession` app-layer simplifications    | app layer   | Deferred | When the UI shell needs full fidelity per sub-item below     |
 
 ---
 
@@ -183,6 +184,29 @@
   ceiling are optimization/tuning, not correctness.
 - **Revisit trigger:** When long offline windows are slow to simulate, or design wants a rune /
   upgrade that lengthens the offline cap.
+
+### D-039 — `GameSession` app-layer simplifications
+
+- **What:** The new `src/app/` `GameSession` coordinator (the TDD-first seam the UI shell will
+  wrap) ships several conscious placeholders:
+  - **Bag capacities not rune-wired:** `createInitialGame` hard-codes
+    `DEFAULT_INVENTORY_CAPACITY` / `DEFAULT_STASH_TAB_CAPACITY` (40) instead of deriving them
+    from a rune `inventoryCapacity` source.
+  - **One chest per clear:** `playStage` drops exactly one chest (guaranteed starter weapon on
+    the very first clear, then `common`), rather than a per-monster / boss drop table.
+  - **Pooled XP only:** `playStage` / `simulateOffline` report XP but do **not** apply it to any
+    `SavedCharacter` (no per-character XP home yet — ties to **D-037**).
+  - **Runes not layered onto live stats:** `buyRune` raises the rune level and spends gold, but
+    rune nodes are not added as a `ModifierSource` on rehydrated combatants, so `statsOf` ignores
+    them.
+  - **No cube EXP on use:** `synthesize` / `sell` don't award cube EXP (`cubeLevel` stays put).
+- **Why deferred (app layer):** The layer exists to drive the domain through real player actions
+  for integration tests _before_ any UI. Each item above is either already tracked elsewhere
+  (D-037) or a fidelity concern the first screens won't need; keeping the coordinator thin avoids
+  premature changes to `persistence` / domain contracts.
+- **Revisit trigger:** When the corresponding screen needs the real behavior — e.g. the Inventory
+  screen surfaces rune-boosted bag size, the Battle screen shows real drop tables, the Character
+  screen displays rune-affected stats or character XP, or the Cube screen levels up on use.
 
 ### D-008 — XP / leveling system
 
@@ -517,4 +541,4 @@
 
 ---
 
-> _Last updated: keep this line current when appending — but never rewrite past entries._
+> _Last updated: D-039 added (app-layer `GameSession` simplifications). Keep this line current when appending — but never rewrite past entries._
