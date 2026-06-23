@@ -17,6 +17,8 @@ import type { Monster } from "../monsters";
 import { Battle } from "./battle";
 import { BattleUnit } from "./battle-unit";
 import { ENEMY_SPAWN_X, PARTY_START_X, UNIT_SPACING } from "./tuning";
+import type { BattleEvents } from "./events";
+import { NO_OP_EVENTS } from "./events";
 
 export type StageStatus = "ongoing" | "cleared" | "wiped";
 
@@ -24,6 +26,7 @@ export class StageRunner implements Clock {
   readonly party: readonly BattleUnit[];
   private readonly waves: readonly (readonly Monster[])[];
   private readonly rng: Rng;
+  private readonly events: BattleEvents;
   private _waveIndex = 0;
   private _battle: Battle;
   private _status: StageStatus = "ongoing";
@@ -32,6 +35,7 @@ export class StageRunner implements Clock {
     party: readonly BattleUnit[],
     waves: readonly (readonly Monster[])[],
     rng: Rng,
+    events: BattleEvents = NO_OP_EVENTS,
   ) {
     if (waves.length === 0) {
       throw new Error("a stage needs at least one wave");
@@ -39,6 +43,7 @@ export class StageRunner implements Clock {
     this.party = party;
     this.waves = waves;
     this.rng = rng;
+    this.events = events;
     this._battle = this.spawnWave(0);
   }
 
@@ -81,7 +86,7 @@ export class StageRunner implements Clock {
           monster.element,
         ),
     );
-    return new Battle(this.party, enemies, this.rng);
+    return new Battle(this.party, enemies, this.rng, this.events);
   }
 
   advance(deltaMs: number): void {

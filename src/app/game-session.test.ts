@@ -176,6 +176,72 @@ describe("GameSession — battle loop", () => {
   });
 });
 
+// ── Slice 2b: steppable battle session (M22) ──────────────────────────────────
+
+describe("GameSession — steppable battle session", () => {
+  const STEP_MS = 100;
+
+  it("beginStage + step-to-completion + finish yields the same report as playStage", () => {
+    const sync = farmingSession(new SeededRng(7)).playStage();
+
+    const stepped = farmingSession(new SeededRng(7));
+    const battle = stepped.beginStage();
+    let guard = 0;
+    while (battle.status === "ongoing" && guard++ < 20_000) {
+      battle.advance(STEP_MS);
+    }
+    const report = battle.finish();
+
+    expect(report).toEqual(sync);
+  });
+
+  it("transitions ongoing → cleared while stepping and banks gold once", () => {
+    const session = farmingSession();
+    const before = session.gold;
+    const battle = session.beginStage();
+
+    expect(battle.status).toBe("ongoing");
+
+    let guard = 0;
+    while (battle.status === "ongoing" && guard++ < 20_000) {
+      battle.advance(STEP_MS);
+    }
+
+    expect(battle.status).toBe("cleared");
+    // rewards are not applied until finish() is called
+    expect(session.gold).toBe(before);
+
+    const report = battle.finish();
+    expect(report.status).toBe("cleared");
+    expect(session.gold).toBe(before + report.gold);
+  });
+
+  it("refuses to finish twice (the reward path runs exactly once)", () => {
+    const session = farmingSession();
+    const battle = session.beginStage();
+    while (battle.status === "ongoing") battle.advance(STEP_MS);
+
+    battle.finish();
+    expect(() => battle.finish()).toThrow();
+  });
+
+  it("buffers battle events and drains them (then clears)", () => {
+    const session = farmingSession();
+    const battle = session.beginStage();
+
+    // Advance a few frames so some hits/deaths are emitted, then drain.
+    for (let i = 0; i < 30 && battle.status === "ongoing"; i++) {
+      battle.advance(STEP_MS);
+    }
+    const first = battle.drainEvents();
+    expect(first.length).toBeGreaterThan(0);
+    expect(first.some((e) => e.type === "hit")).toBe(true);
+
+    // Draining again immediately yields nothing (the buffer was cleared).
+    expect(battle.drainEvents()).toHaveLength(0);
+  });
+});
+
 // ── Slice 3: loot → equip ─────────────────────────────────────────────────────
 
 describe("GameSession — loot to equip", () => {

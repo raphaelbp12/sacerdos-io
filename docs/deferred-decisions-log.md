@@ -22,44 +22,48 @@
 
 ## Index
 
-| ID    | Title                                              | Deferred in | Status   | Revisit trigger (short)                                             |
-| ----- | -------------------------------------------------- | ----------- | -------- | ------------------------------------------------------------------- | --- | ----- | -------------------------- | --- | -------- | ------------------------------------------------- | --- | ----- | ------------------------------------- | --- | -------- | ---------------------------------------------------- |
-| D-001 | Affix system (prefixes/suffixes)                   | M5          | Deferred | After combat makes loot quality matter                              |
-| D-002 | Modifier value _ranges_ (min–max)                  | M5          | Resolved | Resolved in M16 (material rolls draw within a min–max band)         |
-| D-003 | Multiple modifiers per item                        | M5          | Resolved | Resolved in M16 (sockets stack materials on one item)               |
-| D-004 | Named / unique items & crafting                    | M5          | Deferred | After affixes; needs a baseline of item depth                       |
-| D-005 | Drop tables / loot sources                         | M5          | Resolved | Resolved in M14 (drop tables + chests)                              |
-| D-006 | Consumable generation                              | M5          | Deferred | When consumables need variety beyond seed set                       |
-| D-007 | Persistence (save / load)                          | M5          | Resolved | Resolved in M20 (`src/persistence/` DTO ↔ domain mapper)            |
-| D-008 | XP / leveling system                               | pre-M6      | Resolved | Level curve M7; kills award XP (split) M11 (D-024 tunes)            |
-| D-009 | Enemy / monster system                             | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                                |
-| D-010 | Stat cache / memoization                           | M1          | Deferred | Only if profiling shows getStat() is a hotspot                      |
-| D-011 | Skills as class-gated buffs                        | M3          | Resolved | Built in M8 (`src/domain/skills/`)                                  |
-| D-012 | Advanced on-hit effects                            | M6          | Deferred | When gear/skills need regen, leech, per-hit effects                 |
-| D-013 | Additional classes beyond Knight                   | M7          | Deferred | When a second class / class-select UI is wanted                     |
-| D-014 | Enemy skill-casting                                | M8          | Deferred | When monsters need fireball / cold-bolt abilities                   |
-| D-015 | Concrete skill ranges ("tune live")                | M8          | Deferred | When the battle has positions (M10) to tune against                 |
-| D-020 | Respec cost / cooldown                             | M7          | Deferred | If free refunds make builds feel weightless                         |
-| D-021 | Monster stat variance (rng roll)                   | M9          | Deferred | When fights feel too uniform / need per-spawn spread                |
-| D-016 | Battle visuals / formation UI / juice              | M10         | Deferred | When the battle needs a real-time view & polish                     |     | D-017 | Paid-revive cost balancing | M12 | Deferred | When the revive economy needs real pricing/tuning |     | D-022 | Per-unit / stat-driven movement speed | M10 | Deferred | When unit speed should differ (ranged kiting, haste) |
-| D-023 | Buff / debuff skills applied in-battle             | M10         | Deferred | When combatants can carry dynamic modifier sources                  |
-| D-024 | XP → level curve balancing                         | M11         | Deferred | When leveling pace needs tuning against content                     |
-| D-025 | Per-difficulty extra elements                      | M11         | Deferred | When hard should add elements (e.g. act 2 → cold)                   |
-| D-026 | Gold scaling / balance curve                       | M13         | Deferred | When rune buffs (M18) + stage spread allow real tuning              |
-| D-027 | Type-2/3 sockets & Immortal/Mythical tiers         | M16         | Deferred | When the Rarity union expands past Legendary                        |
-| D-028 | Engraving 50/50 dual-stat roll                     | M16         | Deferred | When engraving needs its random-of-two-stats depth                  |
-| D-029 | Full material catalogue                            | M16         | Deferred | When content/balancing needs the complete gem table                 |
-| D-018 | Cube crafting / offering / etc. operations         | M17         | Deferred | When item depth needs craft/offer/decorate/engrave/inscribe         |
-| D-030 | Cube gold/EXP weighting & curve tuning             | M17         | Deferred | When the cube economy needs material/gear weighting + tuning        |
-| D-019 | Second currency + character/group shop             | M19         | Deferred | When acquiring characters/groups needs a shop + currency            |
-| D-034 | Per-group formation capacity value                 | M19         | Deferred | When formation size needs tuning / a stat or rune source            |
-| D-035 | Save-format migrations across versions             | M20         | Deferred | When a `SAVE_VERSION` bump must read older saves                    |
-| D-036 | Save storage adapter + autosave cadence            | M20         | Deferred | When the shell must persist to localStorage / file / cloud          |
-| D-037 | Applying offline XP to characters                  | M21         | Deferred | When `SavedCharacter` gains a `totalXp` / progression field         |
-| D-038 | Offline fidelity / batching + window perk          | M21         | Deferred | When idle accuracy/perf matter (closed-form kills/sec)              |
-| D-039 | `GameSession` app-layer simplifications            | app layer   | Deferred | When the UI shell needs full fidelity per sub-item below            |
-| D-040 | UI test-harness shell simplifications              | UI shell    | Deferred | When the harness graduates to a real game client per sub-item below |
-| D-041 | Act-1 onboarding balance (starter can't clear 1-1) | balance     | Resolved | Fixed: Common pd+5 starter + tamed boss burst + eased early chip    |
+| ID    | Title                                                | Deferred in | Status   | Revisit trigger (short)                                             |
+| ----- | ---------------------------------------------------- | ----------- | -------- | ------------------------------------------------------------------- | --- | ----- | -------------------------- | --- | -------- | ------------------------------------------------- | --- | ----- | ------------------------------------- | --- | -------- | ---------------------------------------------------- |
+| D-001 | Affix system (prefixes/suffixes)                     | M5          | Deferred | After combat makes loot quality matter                              |
+| D-002 | Modifier value _ranges_ (min–max)                    | M5          | Resolved | Resolved in M16 (material rolls draw within a min–max band)         |
+| D-003 | Multiple modifiers per item                          | M5          | Resolved | Resolved in M16 (sockets stack materials on one item)               |
+| D-004 | Named / unique items & crafting                      | M5          | Deferred | After affixes; needs a baseline of item depth                       |
+| D-005 | Drop tables / loot sources                           | M5          | Resolved | Resolved in M14 (drop tables + chests)                              |
+| D-006 | Consumable generation                                | M5          | Deferred | When consumables need variety beyond seed set                       |
+| D-007 | Persistence (save / load)                            | M5          | Resolved | Resolved in M20 (`src/persistence/` DTO ↔ domain mapper)            |
+| D-008 | XP / leveling system                                 | pre-M6      | Resolved | Level curve M7; kills award XP (split) M11 (D-024 tunes)            |
+| D-009 | Enemy / monster system                               | pre-M6      | Resolved | Built in M9 (`src/domain/monsters/`)                                |
+| D-010 | Stat cache / memoization                             | M1          | Deferred | Only if profiling shows getStat() is a hotspot                      |
+| D-011 | Skills as class-gated buffs                          | M3          | Resolved | Built in M8 (`src/domain/skills/`)                                  |
+| D-012 | Advanced on-hit effects                              | M6          | Deferred | When gear/skills need regen, leech, per-hit effects                 |
+| D-013 | Additional classes beyond Knight                     | M7          | Deferred | When a second class / class-select UI is wanted                     |
+| D-014 | Enemy skill-casting                                  | M8          | Deferred | When monsters need fireball / cold-bolt abilities                   |
+| D-015 | Concrete skill ranges ("tune live")                  | M8          | Deferred | When the battle has positions (M10) to tune against                 |
+| D-020 | Respec cost / cooldown                               | M7          | Deferred | If free refunds make builds feel weightless                         |
+| D-021 | Monster stat variance (rng roll)                     | M9          | Deferred | When fights feel too uniform / need per-spawn spread                |
+| D-016 | Battle visuals / formation UI / juice                | M10         | Deferred | When the battle needs a real-time view & polish                     |     | D-017 | Paid-revive cost balancing | M12 | Deferred | When the revive economy needs real pricing/tuning |     | D-022 | Per-unit / stat-driven movement speed | M10 | Deferred | When unit speed should differ (ranged kiting, haste) |
+| D-023 | Buff / debuff skills applied in-battle               | M10         | Deferred | When combatants can carry dynamic modifier sources                  |
+| D-024 | XP → level curve balancing                           | M11         | Deferred | When leveling pace needs tuning against content                     |
+| D-025 | Per-difficulty extra elements                        | M11         | Deferred | When hard should add elements (e.g. act 2 → cold)                   |
+| D-026 | Gold scaling / balance curve                         | M13         | Deferred | When rune buffs (M18) + stage spread allow real tuning              |
+| D-027 | Type-2/3 sockets & Immortal/Mythical tiers           | M16         | Deferred | When the Rarity union expands past Legendary                        |
+| D-028 | Engraving 50/50 dual-stat roll                       | M16         | Deferred | When engraving needs its random-of-two-stats depth                  |
+| D-029 | Full material catalogue                              | M16         | Deferred | When content/balancing needs the complete gem table                 |
+| D-018 | Cube crafting / offering / etc. operations           | M17         | Deferred | When item depth needs craft/offer/decorate/engrave/inscribe         |
+| D-030 | Cube gold/EXP weighting & curve tuning               | M17         | Deferred | When the cube economy needs material/gear weighting + tuning        |
+| D-019 | Second currency + character/group shop               | M19         | Deferred | When acquiring characters/groups needs a shop + currency            |
+| D-034 | Per-group formation capacity value                   | M19         | Deferred | When formation size needs tuning / a stat or rune source            |
+| D-035 | Save-format migrations across versions               | M20         | Deferred | When a `SAVE_VERSION` bump must read older saves                    |
+| D-036 | Save storage adapter + autosave cadence              | M20         | Deferred | When the shell must persist to localStorage / file / cloud          |
+| D-037 | Applying offline XP to characters                    | M21         | Deferred | When `SavedCharacter` gains a `totalXp` / progression field         |
+| D-038 | Offline fidelity / batching + window perk            | M21         | Deferred | When idle accuracy/perf matter (closed-form kills/sec)              |
+| D-039 | `GameSession` app-layer simplifications              | app layer   | Deferred | When the UI shell needs full fidelity per sub-item below            |
+| D-040 | UI test-harness shell simplifications                | UI shell    | Deferred | When the harness graduates to a real game client per sub-item below |
+| D-041 | Act-1 onboarding balance (starter can't clear 1-1)   | balance     | Resolved | Fixed: Common pd+5 starter + tamed boss burst + eased early chip    |
+| D-042 | Battle-view fidelity / juice (animation, art)        | M22         | Deferred | When the live battle needs real art, easing, camera, VFX            |
+| D-043 | Positional inline style in BattleStrip (`--unit-x`)  | M22         | Deferred | When unit positioning moves to a constrained class / layout engine  |
+| D-044 | Auto-loop UX knobs (stop-at-stage, speed, farm lock) | M23         | Deferred | When the idle loop needs speed multiplier / stop-at / farm-lock     |
+| D-045 | Combat-feed depth (crits, mitigation breakdown, DPS) | M24         | Deferred | When players want richer per-hit detail or a live DPS meter         |
 
 ---
 
@@ -276,6 +280,54 @@
   - Validated curve (single hero, 0%/100% across 12–24 seeds): Common `pd+5` L1 clears 1-1, walled
     at 1-2; a stronger weapon alone at L1 still can't clear 1-2 (leveling required); L3 clears 1-2;
     L5 clears 1-3. Guarded by the `act-1 onboarding curve` spec in `src/app/balance.test.ts`.
+
+### D-042 — Battle-view fidelity / juice
+
+- **What:** The M22 live battle view (`BattleStrip` + `UnitCard`, ticked by `useClockLoop`) renders
+  units as labelled HP-bar cards sliding along a 1D strip. It has **no** real art, sprites,
+  attack/hit animation, movement easing, camera/scroll, or visual effects — it is the minimal
+  watchable representation. Extends **D-016** (battle visuals / juice).
+- **Why deferred (M22):** The milestone's goal is _legibility_ — see the fight progress and HP drain
+  in real time — not polish. Art and juice are a separate effort once the loop feels right.
+- **Revisit trigger:** When the battle needs production visuals (sprites, animation, easing, camera,
+  hit VFX) — i.e. the polish pass under **D-016**.
+
+### D-043 — Positional inline style in `BattleStrip` (`--unit-x`)
+
+- **What:** The harness rule is "no inline styles". `BattleStrip` bends it in exactly one place: each
+  unit's normalized 0–100% battlefield position is passed as a `--unit-x` CSS custom property via the
+  `style` prop, read by the `.battle-unit` class in `components.css`. Positioning N units at
+  continuous coordinates can't be expressed with a fixed set of classes.
+- **Why deferred (M22):** A constrained alternative (discrete lane classes, or a layout engine) adds
+  complexity disproportionate to a single keystone composite; scoping the exception to one file keeps
+  the rule meaningful everywhere else.
+- **Revisit trigger:** When unit positioning grows (multiple rows, depth, formations) and warrants a
+  dedicated constrained positioning layer instead of a raw custom property.
+
+### D-044 — Auto-loop UX knobs
+
+- **What:** The M23 idle loop (`nextStagePlan` policy + the Battle screen's chaining) offers only
+  Play/Pause and a "Retry on wipe" toggle. It has **no** speed multiplier (1×/2×/4× fast-forward),
+  no "stop at stage N" target, and no explicit "farm current stage" lock (today farming an earlier
+  stage is implicit: clearing below the frontier repeats it).
+- **Why deferred (M23):** The milestone's goal is a working hands-free loop; these are convenience
+  knobs that are easy to bolt onto the existing pure policy later (OCP) without reworking it.
+- **Revisit trigger:** When idle pacing needs player control — a fast-forward toggle, a stop-at
+  target, or an explicit farm lock distinct from the implicit frontier rule.
+
+### D-045 — Combat-feed depth (crits, mitigation breakdown, DPS meter)
+
+- **What:** M24 surfaces battle events as floating numbers (`-dmg` / `BLOCK` / `DODGE` / `DEFEATED`)
+  and a rolling text feed ("X hits Y for N"). It does **not** distinguish criticals, show the
+  mitigation breakdown (raw vs. resisted vs. blocked amount), tag damage element with color/icon,
+  or aggregate a live DPS / time-to-clear meter. The `onSkill` event is emitted into the feed as a
+  plain cast line but has no dedicated visual yet (that's M30).
+- **Why deferred (M24):** The milestone's goal is to make combat _legible and alive_; the event seam
+  (`BattleEvents` + `RecordingEvents`) is open for extension (OCP), so richer facts are added later by
+  emitting more event fields and mapping them in the pure `ingestBattleEvents`, without reworking the
+  domain or the screen.
+- **Revisit trigger:** When players ask for more per-hit insight (crit feedback, why a hit was small)
+  or a DPS / clear-speed readout to compare builds.
 
 ### D-008 — XP / leveling system
 
@@ -610,4 +662,4 @@
 
 ---
 
-> _Last updated: D-041 revised (onboarding beatable with a genuine Common level-1 sword — starter is now pd+5, boss burst split into hp/damage multipliers, goblin chip eased). Keep this line current when appending — but never rewrite past entries._
+> _Last updated: M24 (floating damage numbers + live combat feed) — added D-045 (combat-feed depth). Keep this line current when appending — but never rewrite past entries._

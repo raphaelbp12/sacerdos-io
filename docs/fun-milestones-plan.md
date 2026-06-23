@@ -42,13 +42,13 @@ systems. The tiers from the design review map 1:1 to milestones:
 >
 > **Status legend:** ⬜ not started · 🟡 in progress · ✅ done · ⏸️ blocked · ⏭️ deferred.
 
-**Current focus:** ⬜ **M22 — Live, ticking battle view** (keystone; start here).
+**Current focus:** ✅ **M22–M24 done** (Checkpoint A reached) → ⏭️ next **M25 — Derived-combat panel**.
 
 | #   | Milestone                             | Tier | Status | Tests | Resolves / Logs             |
 | --- | ------------------------------------- | ---- | ------ | ----- | --------------------------- |
-| M22 | Live, ticking battle view             | T1   | ⬜     | ⬜    | part of D-016; D-042/043    |
-| M23 | Auto-advance / auto-retry idle loop   | T1   | ⬜     | ⬜    | D-044                       |
-| M24 | Floating damage numbers + combat feed | T1   | ⬜     | ⬜    | D-045                       |
+| M22 | Live, ticking battle view             | T1   | ✅     | ✅    | part of D-016; D-042/043    |
+| M23 | Auto-advance / auto-retry idle loop   | T1   | ✅     | ✅    | D-044                       |
+| M24 | Floating damage numbers + combat feed | T1   | ✅     | ✅    | D-045                       |
 | M25 | Derived-combat panel                  | T2   | ⬜     | ⬜    | D-046                       |
 | M26 | Apply XP → real leveling from combat  | T2   | ⬜     | ⬜    | D-037; tail of D-008; D-047 |
 | M27 | Build & gear impact preview           | T2   | ⬜     | ⬜    | D-048                       |

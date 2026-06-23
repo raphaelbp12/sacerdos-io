@@ -4,6 +4,9 @@ export {
   effectiveCooldown,
   physicalResist,
   maxHP,
+  dps,
+  effectiveHP,
+  timeToKill,
   ARMOR_K,
 } from "./derived";
 export {

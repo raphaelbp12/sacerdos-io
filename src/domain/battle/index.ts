@@ -27,3 +27,12 @@ export { Battle } from "./battle";
 
 export type { StageStatus } from "./stage-runner";
 export { StageRunner } from "./stage-runner";
+
+export type {
+  BattleEvents,
+  BattleEvent,
+  HitEvent,
+  SkillEvent,
+  DeathEvent,
+} from "./events";
+export { NO_OP_EVENTS, RecordingEvents } from "./events";

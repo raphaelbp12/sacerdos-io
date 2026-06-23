@@ -589,3 +589,112 @@ button.chip:disabled {
   color: var(--text-h);
   resize: vertical;
 }
+
+/* ── Battlefield (M22 live battle view) ──────────────────────────────────────
+*/
+.battle-strip {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  overflow: hidden;
+}
+
+/* The one positional inline style in the harness (D-043): --unit-x is the unit's
+   normalized 0–100% position on the 1D line, set by the BattleStrip composite. */
+.battle-unit {
+  position: absolute;
+  bottom: var(--space-2);
+  left: var(--unit-x, 50%);
+  transform: translateX(-50%);
+  transition: left 90ms linear;
+}
+
+.battle-unit--party {
+  z-index: 2;
+}
+
+.unit-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 76px;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.battle-unit--enemy .unit-card {
+  border-color: var(--bad, #c0392b);
+}
+
+.unit-card--dead {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.unit-card__name {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--text-h);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unit-card__tags {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+/* Floating combat numbers (M24): rise from the hit's --unit-x position and fade out.
+   Positional --unit-x reuse is the same scoped exception as .battle-unit (D-043). */
+.floater {
+  position: absolute;
+  top: 40%;
+  left: var(--unit-x, 50%);
+  transform: translateX(-50%);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  pointer-events: none;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  animation: floater-rise 800ms ease-out forwards;
+}
+
+.floater--hit {
+  color: #f5d76e;
+}
+
+.floater--block {
+  color: #9fb4c8;
+}
+
+.floater--dodge {
+  color: #8fe3a2;
+}
+
+.floater--death {
+  color: var(--bad, #c0392b);
+}
+
+.floater--skill {
+  color: var(--accent, #7c5cff);
+}
+
+@keyframes floater-rise {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -36px);
+  }
+}

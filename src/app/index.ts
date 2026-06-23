@@ -9,6 +9,7 @@
 export type { StageReport } from "./game-session";
 export {
   GameSession,
+  BattleSession,
   createInitialGame,
   loadGame,
   DEFAULT_INVENTORY_CAPACITY,
@@ -17,3 +18,9 @@ export {
   STARTER_WEAPON_BASE_ID,
   STARTER_WEAPON,
 } from "./game-session";
+export { nextStagePlan } from "./battle-loop";
+export type {
+  StagePlan,
+  StagePlanAction,
+  NextStageOptions,
+} from "./battle-loop";

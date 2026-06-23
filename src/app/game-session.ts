@@ -52,7 +52,14 @@ import {
   DEFAULT_FORMATION_CAPACITY,
 } from "../domain/roster";
 import { StageRunner } from "../domain/battle";
-import type { StageStatus, BattleUnit } from "../domain/battle";
+import { RecordingEvents } from "../domain/battle";
+import { monsterById, scaleMonster } from "../domain/monsters";
+import type {
+  StageStatus,
+  BattleUnit,
+  BattleEvent,
+  BattleEvents,
+} from "../domain/battle";
 import {
   actByIndex,
   stageAt,
@@ -63,7 +70,7 @@ import {
   advance,
   retreat,
 } from "../domain/stages";
-import type { StagePosition } from "../domain/stages";
+import type { StagePosition, StageDef } from "../domain/stages";
 import type { Difficulty } from "../domain/stages";
 import { synthesize as synthesizeItems, sellValue } from "../domain/cube";
 import type { SynthesisResult, Threshold } from "../domain/cube";
@@ -118,6 +125,64 @@ export interface StageReport {
   readonly xp: number;
   /** Chests dropped by the clear (added to {@link GameSession.pendingChests}). */
   readonly chests: readonly Chest[];
+}
+
+/**
+ * A **steppable** stage in progress — the controller the UI shell ticks frame-by-frame
+ * to render a live battle (M22). It is a thin wrapper around a {@link StageRunner}: the
+ * shell drives it with `advance(deltaMs)` (via the injected `Clock` loop) and reads the
+ * live `runner` to draw units; when the runner settles, `finish()` applies the rewards
+ * and progression **exactly once** through the same `finishStage` path the synchronous
+ * {@link GameSession.playStage} uses (DRY — there is a single reward path).
+ *
+ * SRP: this only orchestrates stepping + finishing. It holds no game rules; `finish`
+ * delegates entirely to the `GameSession`.
+ */
+export class BattleSession {
+  /** The live runner, read-only for rendering (party, enemies, wave, status). */
+  declare readonly runner: StageRunner;
+  /** Applies rewards/progression once the stage settles; injected by the session. */
+  declare private readonly onFinish: () => StageReport;
+  /** Buffers battle events for the shell to pull each frame (keeps React out of the domain). */
+  declare private readonly recorder: RecordingEvents;
+  private finished = false;
+
+  constructor(
+    runner: StageRunner,
+    onFinish: () => StageReport,
+    recorder: RecordingEvents,
+  ) {
+    this.runner = runner;
+    this.onFinish = onFinish;
+    this.recorder = recorder;
+  }
+
+  /** `ongoing` until the stage settles, then `cleared` / `wiped`. */
+  get status(): StageStatus {
+    return this.runner.status;
+  }
+
+  /** Advance the underlying battle by `deltaMs` (no-op once settled). */
+  advance(deltaMs: number): void {
+    this.runner.advance(deltaMs);
+  }
+
+  /** Pull and clear the battle events emitted since the last drain (for floating numbers + feed). */
+  drainEvents(): readonly BattleEvent[] {
+    return this.recorder.drain();
+  }
+
+  /**
+   * Apply the stage outcome (rewards + progression) and return the report. Throws if
+   * called more than once — the reward path must run exactly once per stage.
+   */
+  finish(): StageReport {
+    if (this.finished) {
+      throw new Error("stage already finished");
+    }
+    this.finished = true;
+    return this.onFinish();
+  }
 }
 
 export class GameSession {
@@ -216,6 +281,26 @@ export class GameSession {
     const member = buildMember(this.requireCharacter(charId));
     const out = {} as Record<Stat, number>;
     for (const stat of STATS) out[stat] = member.combatant.getStat(stat);
+    return out;
+  }
+
+  /**
+   * Final stats of the current stage's regular monster — the reference defender the
+   * Character screen uses for estimated time-to-kill (M25). Mirrors {@link statsOf}:
+   * compose the domain's `scaleMonster`, return a plain stat snapshot for the UI.
+   */
+  referenceMonsterStats(): Record<Stat, number> {
+    const { actIndex, stageIndex } = this.progression.position;
+    const act = actByIndex(actIndex);
+    const stage = stageAt(actIndex, stageIndex);
+    const level = stageMonsterLevel(stage, this.progression.difficulty);
+    const monster = scaleMonster(
+      monsterById(stage.monsterId),
+      level,
+      act.allowedElements,
+    );
+    const out = {} as Record<Stat, number>;
+    for (const stat of STATS) out[stat] = monster.getStat(stat);
     return out;
   }
 
@@ -329,21 +414,7 @@ export class GameSession {
    * stage (never below 1-1) and pays nothing. Deterministic under the injected `Rng`.
    */
   playStage(): StageReport {
-    const group = buildGroupRoster(this.gameState).groups[0];
-    if (!group || group.size === 0) {
-      throw new Error("no active group to field");
-    }
-    const { actIndex, stageIndex } = this.progression.position;
-    const difficulty = this.progression.difficulty;
-    const act = actByIndex(actIndex);
-    const stage = stageAt(actIndex, stageIndex);
-
-    const party = group.buildParty(buildRoster(this.gameState));
-    const runner = new StageRunner(
-      party,
-      buildStageWaves(act, stage, difficulty),
-      this.rng,
-    );
+    const { runner, stage, difficulty } = this.startStage();
 
     // Console trace, gated by `debugBattle` (no-ops when off — see the field doc).
     const verbose = this.debugBattle;
@@ -351,6 +422,10 @@ export class GameSession {
     const warn = verbose ? (msg: string) => console.warn(msg) : () => {};
     const groupStart = verbose ? (msg: string) => console.group(msg) : () => {};
     const groupEnd = verbose ? () => console.groupEnd() : () => {};
+
+    const { actIndex, stageIndex } = this.progression.position;
+    const act = actByIndex(actIndex);
+    const party = runner.party;
 
     groupStart(
       `[playStage] ${actIndex}-${stageIndex} (${difficulty}) — ${act.name}`,
@@ -411,55 +486,35 @@ export class GameSession {
       warn(`⏱ hit MAX_STAGE_MS (${MAX_STAGE_MS}ms) — fight never resolved`);
     }
 
-    if (runner.status !== "cleared") {
+    const report = this.finishStage(runner, stage, difficulty);
+
+    if (report.status === "wiped") {
       log(`✖ wiped after ${elapsed}ms — retreating one stage`);
-      groupEnd();
-      this.progression = {
-        ...this.progression,
-        position: retreat(this.progression.position),
-      };
-      return { status: "wiped", gold: 0, xp: 0, chests: [] };
+    } else {
+      log(`✔ cleared in ${elapsed}ms`);
+      log(
+        `rewards: +${report.gold}g, +${report.xp} xp, chest(s): ${report.chests.map((c) => c.tier).join(", ")}`,
+      );
     }
-
-    log(`✔ cleared in ${elapsed}ms`);
-
-    const level = stageMonsterLevel(stage, difficulty);
-    const monsterSource: GoldSource =
-      stage.index <= 5 ? "weakMonster" : "strongMonster";
-    const monsterGold = goldForKill(
-      monsterSource,
-      level,
-      this.runes.goldModifiersFor("monster"),
-    );
-    const bossGold = goldForKill(
-      "stageBoss",
-      level,
-      this.runes.goldModifiersFor("boss"),
-    );
-    const monsterXp = xpForKill("monster", stage.xpPerMonster);
-    const bossXp = xpForKill("stageBoss", stage.xpPerMonster);
-    const regularMonsters = runner.totalMonsters - 1; // last "monster" is the stage boss
-    const gold = regularMonsters * monsterGold + bossGold;
-    const xp = regularMonsters * monsterXp + bossXp;
-
-    const chest: Chest = this.firstChestDropped
-      ? { tier: "common" }
-      : firstChest(STARTER_WEAPON_BASE_ID);
-    this.firstChestDropped = true;
-    this.chests.push(chest);
-
-    this.wallet.add(gold);
-    this.progression = {
-      ...this.progression,
-      position: advance(this.progression.position),
-    };
-
-    log(
-      `rewards: +${gold}g (${regularMonsters}×${monsterGold} + boss ${bossGold}), +${xp} xp, chest: ${chest.tier}`,
-    );
     groupEnd();
 
-    return { status: "cleared", gold, xp, chests: [chest] };
+    return report;
+  }
+
+  /**
+   * Begin the current stage as a **steppable** {@link BattleSession} (M22). Builds the
+   * same party + {@link StageRunner} `playStage` would, but hands the caller frame-by-frame
+   * control: the shell `advance()`s it on a clock and renders the live `runner`, then calls
+   * `finish()` to bank rewards through the shared `finishStage` path.
+   */
+  beginStage(): BattleSession {
+    const recorder = new RecordingEvents();
+    const { runner, stage, difficulty } = this.startStage(recorder);
+    return new BattleSession(
+      runner,
+      () => this.finishStage(runner, stage, difficulty),
+      recorder,
+    );
   }
 
   /** Open the next pending chest into the inventory; throws when the bag is full. */
@@ -535,6 +590,83 @@ export class GameSession {
   }
 
   // ── internals ─────────────────────────────────────────────────────────────────
+
+  /** Build the active party + a fresh {@link StageRunner} for the current position. */
+  private startStage(events?: BattleEvents): {
+    runner: StageRunner;
+    stage: StageDef;
+    difficulty: Difficulty;
+  } {
+    const group = buildGroupRoster(this.gameState).groups[0];
+    if (!group || group.size === 0) {
+      throw new Error("no active group to field");
+    }
+    const { actIndex, stageIndex } = this.progression.position;
+    const difficulty = this.progression.difficulty;
+    const act = actByIndex(actIndex);
+    const stage = stageAt(actIndex, stageIndex);
+    const party = group.buildParty(buildRoster(this.gameState));
+    const runner = new StageRunner(
+      party,
+      buildStageWaves(act, stage, difficulty),
+      this.rng,
+      events,
+    );
+    return { runner, stage, difficulty };
+  }
+
+  /**
+   * Map a **settled** runner to its {@link StageReport}, applying rewards + progression.
+   * The single reward path shared by {@link playStage} (synchronous) and
+   * {@link BattleSession} (stepped) — DRY. A clear awards gold, reports pooled xp, drops a
+   * chest, and advances one stage; anything else retreats one stage and pays nothing.
+   */
+  private finishStage(
+    runner: StageRunner,
+    stage: StageDef,
+    difficulty: Difficulty,
+  ): StageReport {
+    if (runner.status !== "cleared") {
+      this.progression = {
+        ...this.progression,
+        position: retreat(this.progression.position),
+      };
+      return { status: "wiped", gold: 0, xp: 0, chests: [] };
+    }
+
+    const level = stageMonsterLevel(stage, difficulty);
+    const monsterSource: GoldSource =
+      stage.index <= 5 ? "weakMonster" : "strongMonster";
+    const monsterGold = goldForKill(
+      monsterSource,
+      level,
+      this.runes.goldModifiersFor("monster"),
+    );
+    const bossGold = goldForKill(
+      "stageBoss",
+      level,
+      this.runes.goldModifiersFor("boss"),
+    );
+    const monsterXp = xpForKill("monster", stage.xpPerMonster);
+    const bossXp = xpForKill("stageBoss", stage.xpPerMonster);
+    const regularMonsters = runner.totalMonsters - 1; // last "monster" is the stage boss
+    const gold = regularMonsters * monsterGold + bossGold;
+    const xp = regularMonsters * monsterXp + bossXp;
+
+    const chest: Chest = this.firstChestDropped
+      ? { tier: "common" }
+      : firstChest(STARTER_WEAPON_BASE_ID);
+    this.firstChestDropped = true;
+    this.chests.push(chest);
+
+    this.wallet.add(gold);
+    this.progression = {
+      ...this.progression,
+      position: advance(this.progression.position),
+    };
+
+    return { status: "cleared", gold, xp, chests: [chest] };
+  }
 
   private requireCharacter(charId: string): SavedCharacter {
     const saved = this.characters.find((c) => c.id === charId);

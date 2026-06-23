@@ -20,6 +20,8 @@ import type { Rng } from "../rng";
 import type { BattleUnit } from "./battle-unit";
 import { approach, distance, frontMost, stepFor } from "./battlefield";
 import { SKILL_RANGE, STAGE_LEFT_LIMIT } from "./tuning";
+import type { BattleEvents } from "./events";
+import { NO_OP_EVENTS } from "./events";
 
 export type BattleStatus = "ongoing" | "won" | "lost";
 
@@ -27,15 +29,18 @@ export class Battle implements Clock {
   readonly party: readonly BattleUnit[];
   readonly enemies: readonly BattleUnit[];
   private readonly rng: Rng;
+  private readonly events: BattleEvents;
 
   constructor(
     party: readonly BattleUnit[],
     enemies: readonly BattleUnit[],
     rng: Rng,
+    events: BattleEvents = NO_OP_EVENTS,
   ) {
     this.party = party;
     this.enemies = enemies;
     this.rng = rng;
+    this.events = events;
   }
 
   /** `won` when all enemies are down, `lost` when the party is, else `ongoing`. */
@@ -132,12 +137,30 @@ export class Battle implements Clock {
     if (distance(unit.x, target.x) > unit.engageRange) return; // out of range: wind-up paused
     unit.attackTimerMs -= deltaMs;
     while (unit.attackTimerMs <= 0 && target.isAlive) {
-      resolveAttack(
+      const result = resolveAttack(
         unit.combatant,
         target.combatant,
         this.rng,
         unit.attackElement,
       );
+      this.events.onHit({
+        attacker: unit.name,
+        target: target.name,
+        targetSide: target.side,
+        x: target.x,
+        damage: result.damage,
+        blocked: result.blocked,
+        dodged: result.dodged,
+        defeated: result.defeated,
+        element: result.element,
+      });
+      if (result.defeated) {
+        this.events.onDeath({
+          unit: target.name,
+          side: target.side,
+          x: target.x,
+        });
+      }
       unit.attackTimerMs += unit.basicAttackInterval();
     }
     if (unit.attackTimerMs < 0) unit.attackTimerMs = 0; // target died mid-wind-up
